@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same branch/PR to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene:
+    name: Repo hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify required files exist
+        run: |
+          missing=0
+          for f in README.md LICENSE CONTRIBUTING.md .gitignore; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Missing required file: $f"
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 0 ]; then
+            echo "All required hygiene files are present. ✅"
+          fi
+          exit $missing
+
+  build:
+    name: Lint, typecheck & test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect app scaffold
+        id: detect
+        run: |
+          if [ -f package.json ]; then
+            echo "scaffolded=true" >> "$GITHUB_OUTPUT"
+            echo "Found package.json — running JS checks."
+          else
+            echo "scaffolded=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No package.json yet — skipping JS checks. These steps activate automatically once the React Native app is scaffolded."
+          fi
+
+      - name: Set up Node
+        if: steps.detect.outputs.scaffolded == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install dependencies
+        if: steps.detect.outputs.scaffolded == 'true'
+        run: npm ci || npm install
+
+      - name: Type-check
+        if: steps.detect.outputs.scaffolded == 'true'
+        run: npm run typecheck --if-present
+
+      - name: Lint
+        if: steps.detect.outputs.scaffolded == 'true'
+        run: npm run lint --if-present
+
+      - name: Check formatting
+        if: steps.detect.outputs.scaffolded == 'true'
+        run: npm run format:check --if-present
+
+      - name: Test
+        if: steps.detect.outputs.scaffolded == 'true'
+        run: npm test --if-present -- --ci
