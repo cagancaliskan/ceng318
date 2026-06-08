@@ -1,0 +1,11 @@
+# Generated / vendored — don't format these.
+node_modules/
+coverage/
+dist/
+web-build/
+android/
+ios/
+.expo/
+*.lock
+package-lock.json
+yarn.lock

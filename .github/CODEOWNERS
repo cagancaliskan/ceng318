@@ -1,0 +1,16 @@
+# CODEOWNERS — who gets auto-requested for review.
+# Order matters: the LAST matching pattern wins. Docs:
+# https://docs.github.com/articles/about-code-owners
+#
+# TODO(team): add each member's GitHub handle and split ownership by area so
+# reviews land on the right person. Handles here must be collaborators on the repo.
+
+# Default owner for everything in the repo
+*               @cagancaliskan
+
+# Example area ownership (uncomment & assign once the app is scaffolded):
+# /src/navigation/   @cagancaliskan @teammate-handle
+# /src/services/     @teammate-handle
+# /.github/          @cagancaliskan
+# /ios/              @teammate-handle
+# /android/          @teammate-handle

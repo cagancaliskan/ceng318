@@ -1,0 +1,46 @@
+# =============================================================================
+# Normalize line endings so Windows/macOS/Linux teammates don't fight git.
+# =============================================================================
+
+# Auto-detect text files and normalize to LF in the repo.
+* text=auto eol=lf
+
+# Explicit text files
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.sh     text eol=lf
+*.gradle text eol=lf
+*.pro    text eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+
+# Binary assets — never normalize or diff as text
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.ico    binary
+*.ttf    binary
+*.otf    binary
+*.woff   binary
+*.woff2  binary
+*.pdf    binary
+*.keystore binary
+*.jar    binary
+*.apk    binary
+*.aab    binary
+*.ipa    binary
+
+# Lockfiles: treat as generated so they collapse in PR diffs on GitHub.
+package-lock.json linguist-generated=true
+yarn.lock         linguist-generated=true
+Podfile.lock      linguist-generated=true
