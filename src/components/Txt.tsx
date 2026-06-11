@@ -1,13 +1,13 @@
 import React from 'react';
 import { Text, TextProps } from 'react-native';
-import { manrope } from '../theme/fonts';
+import { hn } from '../theme/fonts';
 import { ds } from '../theme/scale';
 import { C } from '../theme/colors';
 
 type Props = TextProps & {
   /** design font size in px (auto-scaled to the device) */
   size?: number;
-  /** design fontWeight 200–900 (mapped to the exact Manrope file) */
+  /** design weight: 100=Thin, 300=Light, 400=Regular, 500=Medium */
   weight?: number;
   color?: string;
   /** letterSpacing in design px */
@@ -17,29 +17,13 @@ type Props = TextProps & {
   center?: boolean;
 };
 
-/**
- * Text with the design's Manrope face applied per weight and sizes scaled to the
- * device. Mirrors the design's inline `fontSize` / `fontWeight` / `letterSpacing`.
- */
-export function Txt({
-  size = 12,
-  weight = 400,
-  color = C.text,
-  ls,
-  lh,
-  center,
-  style,
-  ...rest
-}: Props) {
+/** Text with the design's Helvetica Neue face per weight and sizes scaled to the device. */
+export function Txt({ size = 14, weight = 400, color = C.black, ls, lh, center, style, ...rest }: Props) {
   return (
     <Text
       {...rest}
       style={[
-        {
-          fontFamily: manrope(weight),
-          fontSize: ds(size),
-          color,
-        },
+        { fontFamily: hn(weight), fontSize: ds(size), color },
         ls != null && { letterSpacing: ds(ls) },
         lh != null && { lineHeight: ds(lh) },
         center && { textAlign: 'center' },

@@ -1,55 +1,30 @@
-// Manrope is the design's primary face (FONT = 'Manrope, Inter, ...'), Inter the
-// fallback. React Native does NOT synthesize weights for custom fonts, so we map
-// each design `fontWeight` to the exact bundled family file.
-import {
-  Manrope_200ExtraLight,
-  Manrope_300Light,
-  Manrope_400Regular,
-  Manrope_500Medium,
-  Manrope_600SemiBold,
-  Manrope_700Bold,
-  Manrope_800ExtraBold,
-} from '@expo-google-fonts/manrope';
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_800ExtraBold,
-} from '@expo-google-fonts/inter';
+import { Platform } from 'react-native';
 
-// Passed to useFonts() at app start.
-export const fontsToLoad = {
-  Manrope_200ExtraLight,
-  Manrope_300Light,
-  Manrope_400Regular,
-  Manrope_500Medium,
-  Manrope_600SemiBold,
-  Manrope_700Bold,
-  Manrope_800ExtraBold,
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_800ExtraBold,
-};
-
-/** design fontWeight (200–900) → bundled Manrope family name */
-export function manrope(weight: number = 400): string {
-  if (weight <= 200) return 'Manrope_200ExtraLight';
-  if (weight <= 300) return 'Manrope_300Light';
-  if (weight <= 400) return 'Manrope_400Regular';
-  if (weight <= 500) return 'Manrope_500Medium';
-  if (weight <= 600) return 'Manrope_600SemiBold';
-  if (weight <= 700) return 'Manrope_700Bold';
-  return 'Manrope_800ExtraBold'; // covers 800 & 900 (Manrope tops out at 800)
+// The new design uses Helvetica Neue (Thin / Light / Regular / Medium) — a native
+// iOS system font, so nothing needs bundling. On iOS we map each design weight to
+// its exact PostScript family; Android falls back to its sans-serif weights.
+function family(weight: number): string {
+  if (Platform.OS === 'ios') {
+    if (weight <= 100) return 'HelveticaNeue-Thin';
+    if (weight <= 300) return 'HelveticaNeue-Light';
+    if (weight <= 400) return 'HelveticaNeue';
+    if (weight <= 500) return 'HelveticaNeue-Medium';
+    return 'HelveticaNeue-Bold';
+  }
+  if (weight <= 100) return 'sans-serif-thin';
+  if (weight <= 300) return 'sans-serif-light';
+  if (weight <= 400) return 'sans-serif';
+  if (weight <= 500) return 'sans-serif-medium';
+  return 'sans-serif';
 }
 
-/** Inter equivalent, used where the design explicitly falls back to Inter. */
-export function inter(weight: number = 400): string {
-  if (weight <= 400) return 'Inter_400Regular';
-  if (weight <= 500) return 'Inter_500Medium';
-  if (weight <= 600) return 'Inter_600SemiBold';
-  if (weight <= 700) return 'Inter_700Bold';
-  return 'Inter_800ExtraBold';
+/**
+ * design weight → platform font family.
+ * Helvetica Neue weights used by the design: Thin=100, Light=300, Regular=400, Medium=500.
+ */
+export function hn(weight: number = 400): string {
+  return family(weight);
 }
+
+/** Back-compat alias so older call sites keep resolving. */
+export const manrope = hn;

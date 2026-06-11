@@ -11,5 +11,4 @@ export type RootStackParamList = {
   History: undefined;
   WaterWarning: undefined;
   CookingComplete: { count?: number; doneness?: string; time?: string } | undefined;
-  Lockscreen: undefined;
 };

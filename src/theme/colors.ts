@@ -1,36 +1,20 @@
-// EggChef palette — copied verbatim from the source design's `C2` object.
-// Do not adjust these values; they define the entire look.
+// EggChef palette — from the new Figma ("bordo" #5A1520 brand). These define the
+// entire look; the app background is a near-white #faf9f9 and text is black.
 export const C = {
-  primary: '#76919B',
-  primaryDeep: '#5d7681',
-  primarySoft: 'rgba(118,145,155,0.10)',
-  primarySoftBorder: 'rgba(118,145,155,0.22)',
-  dark: '#3a4448',
-  darkSoft: '#696868',
-  panel: '#EDEEEB',
-  panelStrong: '#D7D8D4',
-  med: '#9B9B9B',
-  medSoft: '#BEBFBC',
-  bg: '#FBFFF9',
-  bgTint: '#F4F6F2',
+  bg: '#faf9f9',
   white: '#ffffff',
-  text: '#2b2f31',
-  textMute: '#8a8d8a',
-} as const;
+  black: '#000000',
 
-// A few one-off colors the design uses inline (warnings, iOS dock app icons).
-export const Cx = {
-  warn: '#ff9f0a',
-  warnDeep: '#ff7a00',
-  warnText: '#c46d00',
-  warnTextDeep: '#a55a00',
-  warnBg: '#fff8ee',
-  red: '#ff3b30',
-  green: '#34c759',
-  greenDeep: '#248a3d',
-  blue: '#0a84ff',
-  blueSoft: '#5e9eff',
-  phoneGreen: '#34c759',
+  // brand reds (deepest → brightest)
+  bordo: '#5a1520', // egg count, highlighted values, accents
+  bordoMid: '#8a2032', // "EggChef" wordmark
+  bordoBright: '#ad283e', // primary button (Başlat) base
+
+  // neutrals
+  gray: '#9b9b9b', // secondary text / inactive
+  grayLight: '#d9d9d9', // borders, empty-egg fill, dividers
+  panel: '#f0efef', // subtle panels / chips
+  panelTint: '#f2eef0', // faint bordo-tinted panel
 } as const;
 
 export type ColorKey = keyof typeof C;

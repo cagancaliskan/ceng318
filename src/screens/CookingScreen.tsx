@@ -1,148 +1,171 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Pressable } from 'react-native';
 import Svg, { Defs, LinearGradient as SvgLinear, Stop, Circle, Path } from 'react-native-svg';
-import { useNavigation, useRoute, useIsFocused, RouteProp } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { C } from '../theme/colors';
 import { ds } from '../theme/scale';
-import { manrope } from '../theme/fonts';
 import { bs } from '../theme/shadow';
+import { Txt } from '../components/Txt';
 import { LinearGrad } from '../components/Gradient';
 import { AppHeader } from '../components/AppHeader';
 import { Screen } from '../components/Screen';
-import { Pause } from '../icons';
 import { BottomNav } from '../components/BottomNav';
 import { useSession } from '../state/session';
 import { tabRoute } from '../navigation/helpers';
 import type { RootStackParamList } from '../navigation/types';
 
 const fmt = (sec: number) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+const STAGES = ['Su Alıyor', 'Isınıyor', 'Haşlanıyor'];
+// per-stage accent colors (water = blue, heat = amber, boil = bordo)
+const STAGE_COLORS = ['#2f7ad1', '#e0a52a', C.bordoBright];
 
-function StageIcon({ id, color }: { id: number; color: string }) {
+function StageIcon({ id, color, size = 26 }: { id: number; color: string; size?: number }) {
   if (id === 0)
     return (
-      <Svg width={ds(16)} height={ds(16)} viewBox="0 0 24 24" fill={color}>
-        <Path d="M12 2c-4 5-6 8-6 12a6 6 0 0012 0c0-4-2-7-6-12z" />
+      <Svg width={ds(size)} height={ds(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinejoin="round">
+        <Path d="M12 3.5c-3.5 4.2-6 7.2-6 10.5a6 6 0 0012 0c0-3.3-2.5-6.3-6-10.5z" />
       </Svg>
     );
   if (id === 1)
     return (
-      <Svg width={ds(16)} height={ds(16)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
-        <Path d="M14 4v9a4 4 0 11-4 0V4a2 2 0 014 0z" />
+      <Svg width={ds(size)} height={ds(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round">
+        <Path d="M14 4.5v8.2a4 4 0 11-4 0V4.5a2 2 0 014 0z" />
       </Svg>
     );
   return (
-    <Svg width={ds(16)} height={ds(16)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round">
-      <Path d="M7 14c0-4 2-6 5-6s5 2 5 6" />
-      <Path d="M5 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2" />
+    <Svg width={ds(size)} height={ds(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round">
+      <Path d="M7 9c1.3-1.6 1.3-2.8 0-4.4M12 9c1.3-1.6 1.3-2.8 0-4.4M17 9c1.3-1.6 1.3-2.8 0-4.4" />
+      <Path d="M5 13c0-1 1-2 7-2s7 1 7 2c0 4-2 7-7 7s-7-3-7-7z" />
     </Svg>
   );
 }
 
-// 05 / 06 · Cooking — live countdown drives the ring, stage tracker, and the
-// auto-transition into the completion popup.
+// 05 · Cooking (su alıyor / ısınıyor / haşlanıyor). Counts down only while a cook
+// is active; the tab shows an idle "Başlat" state otherwise.
 export function CookingScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const route = useRoute<RouteProp<RootStackParamList, 'Cooking'>>();
   const s = useSession();
   const focused = useIsFocused();
-
-  const total = useRef<number>(
-    route.params?.minutes != null
-      ? route.params.minutes * 60 + (route.params.seconds ?? 0)
-      : parseInt(String(s.time).match(/\d+/)?.[0] ?? '8', 10) * 60,
-  ).current;
-  const [remaining, setRemaining] = useState(total);
+  const [, force] = useState(0);
 
   useEffect(() => {
-    if (!focused) return;
-    if (remaining <= 0) {
-      const t = setTimeout(() => nav.navigate('CookingComplete', { count: s.count, doneness: s.doneness, time: fmt(total) }), 500);
-      return () => clearTimeout(t);
-    }
-    const iv = setInterval(() => setRemaining((r: number) => Math.max(0, r - 1)), 1000);
+    if (!focused || !s.cookActive) return;
+    const iv = setInterval(() => force((x) => (x + 1) % 1000000), 1000);
     return () => clearInterval(iv);
-  }, [focused, remaining, nav, s.count, s.doneness, total]);
+  }, [focused, s.cookActive]);
 
-  const progress = total > 0 ? 1 - remaining / total : 0;
+  const elapsed = s.cookActive ? Math.floor((Date.now() - s.cookStartedAt) / 1000) : 0;
+  const total = s.cookActive ? s.cookTotal : s.durationSec;
+  const remaining = Math.max(0, total - elapsed);
+  const progress = s.cookActive && total > 0 ? Math.min(1, elapsed / total) : 0;
   const stage = progress >= 0.66 ? 2 : progress >= 0.33 ? 1 : 0;
 
-  const R = ds(78);
-  const circ = 2 * Math.PI * R;
-  const dash = circ * progress;
+  useEffect(() => {
+    if (focused && s.cookActive && remaining === 0) {
+      const t = setTimeout(() => nav.navigate('CookingComplete'), 300);
+      return () => clearTimeout(t);
+    }
+  }, [focused, s.cookActive, remaining, nav]);
 
-  const stages = [
-    { label: 'Su Alınıyor' },
-    { label: 'Isınıyor' },
-    { label: 'Haşlanıyor' },
+  // ring geometry — progress sweeps COUNTER-CLOCKWISE from the top
+  const cx = ds(150);
+  const cy = ds(150);
+  const Rr = ds(132);
+  const pt = (phi: number) => ({ x: cx - Rr * Math.sin(phi), y: cy - Rr * Math.cos(phi) });
+  const sweep = Math.min(progress, 0.9999) * Math.PI * 2;
+  const p0 = pt(0);
+  const pe = pt(sweep);
+  const largeArc = sweep > Math.PI ? 1 : 0;
+  const dPath = `M ${p0.x} ${p0.y} A ${Rr} ${Rr} 0 ${largeArc} 0 ${pe.x} ${pe.y}`;
+
+  const bubbles = [
+    { id: 0, color: '#2f7ad1', phi: 0 },
+    { id: 1, color: '#e0a52a', phi: Math.PI / 3 },
+    { id: 2, color: C.bordoBright, phi: (2 * Math.PI) / 3 },
   ];
 
-  return (
-    <Screen bg={C.bg}>
-      <AppHeader />
-      <View style={{ flex: 1, paddingHorizontal: ds(18), paddingTop: ds(10), paddingBottom: ds(110) }}>
-        {/* lid pill */}
-        <View style={{ alignSelf: 'center', backgroundColor: '#fff', paddingVertical: ds(7), paddingHorizontal: ds(18), borderRadius: ds(20), flexDirection: 'row', alignItems: 'center', gap: ds(6), boxShadow: bs('0 2px 8px -4px rgba(60,70,75,0.1), inset 0 0 0 1px rgba(0,0,0,0.04)') }}>
-          <View style={{ width: ds(6), height: ds(6), borderRadius: ds(3), backgroundColor: C.primary }} />
-          <Text style={{ color: C.dark, fontSize: ds(11.5), fontFamily: manrope(700), letterSpacing: -ds(0.2) }}>Kapak Kapalı</Text>
-        </View>
+  const onButton = () => {
+    if (s.cookActive) {
+      s.stopCook();
+      nav.navigate('Menu');
+    } else if (s.lowWater) {
+      nav.navigate('WaterWarning');
+    } else {
+      s.startCook(s.durationSec);
+    }
+  };
 
+  return (
+    <Screen bg={C.bg} padTop={false}>
+      <AppHeader />
+      <View style={{ flex: 1, paddingHorizontal: ds(33), paddingBottom: ds(96), alignItems: 'center' }}>
         {/* progress ring */}
-        <View style={{ marginTop: ds(18), alignItems: 'center' }}>
-          <View style={{ width: ds(190), height: ds(190) }}>
-            <Svg width={ds(190)} height={ds(190)} style={{ transform: [{ rotate: '-90deg' }] }}>
-              <Defs>
-                <SvgLinear id="prog" x1="0" y1="0" x2="1" y2="1">
-                  <Stop offset="0%" stopColor={C.primary} />
-                  <Stop offset="100%" stopColor={C.primaryDeep} />
-                </SvgLinear>
-              </Defs>
-              <Circle cx={ds(95)} cy={ds(95)} r={R} fill="#fff" stroke={C.panel} strokeWidth={ds(8)} />
-              {progress > 0 && (
-                <Circle cx={ds(95)} cy={ds(95)} r={R} fill="none" stroke="url(#prog)" strokeWidth={ds(9)} strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" />
-              )}
-            </Svg>
-            <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ fontSize: ds(11), color: C.med, letterSpacing: ds(1.5), fontFamily: manrope(700), marginBottom: ds(2), textTransform: 'uppercase' }}>Kalan Süre</Text>
-              <Text style={{ fontSize: ds(40), fontFamily: manrope(800), color: C.dark, letterSpacing: -ds(1.5) }}>{fmt(remaining)}</Text>
-            </View>
+        <View style={{ marginTop: ds(44), width: ds(300), height: ds(300) }}>
+          <Svg width={ds(300)} height={ds(300)}>
+            <Defs>
+              <SvgLinear id="cook" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0%" stopColor="#ad283e" />
+                <Stop offset="100%" stopColor={C.bordo} />
+              </SvgLinear>
+            </Defs>
+            <Circle cx={cx} cy={cy} r={Rr} fill="none" stroke="rgba(90,21,32,0.08)" strokeWidth={ds(12)} />
+            {progress > 0 && <Path d={dPath} fill="none" stroke="url(#cook)" strokeWidth={ds(12)} strokeLinecap="round" />}
+          </Svg>
+
+          {/* 3 stage bubbles sitting on the ring */}
+          {bubbles.map((b) => {
+            const c = pt(b.phi);
+            return (
+              <View
+                key={b.id}
+                style={{
+                  position: 'absolute',
+                  left: c.x - ds(23),
+                  top: c.y - ds(23),
+                  width: ds(46),
+                  height: ds(46),
+                  borderRadius: ds(23),
+                  backgroundColor: C.white,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: bs('0 4px 10px -3px rgba(0,0,0,0.18)'),
+                }}
+              >
+                <StageIcon id={b.id} color={b.color} size={22} />
+              </View>
+            );
+          })}
+
+          {/* center readout */}
+          <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
+            <Txt size={64} weight={100} color={C.bordo} style={{ lineHeight: ds(70) }}>
+              {fmt(remaining)}
+            </Txt>
+            <Txt size={20} weight={300} color={C.gray} style={{ marginTop: ds(2) }}>
+              {s.cookActive ? 'kaldı' : 'hazır'}
+            </Txt>
           </View>
         </View>
 
-        {/* stage tracker */}
-        <View style={{ marginTop: ds(26), flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingHorizontal: ds(4) }}>
-          {stages.map((st, i) => {
-            const active = i <= stage;
-            return (
-              <React.Fragment key={i}>
-                <View style={{ alignItems: 'center', gap: ds(6), width: ds(64) }}>
-                  {active ? (
-                    <LinearGrad deg={135} colors={[C.primary, C.primaryDeep]} style={{ width: ds(36), height: ds(36), borderRadius: ds(12), alignItems: 'center', justifyContent: 'center', boxShadow: bs('0 6px 14px -4px rgba(118,145,155,0.45)') }}>
-                      <StageIcon id={i} color="#fff" />
-                    </LinearGrad>
-                  ) : (
-                    <View style={{ width: ds(36), height: ds(36), borderRadius: ds(12), backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', boxShadow: bs(`inset 0 0 0 1px ${C.panelStrong}`) }}>
-                      <StageIcon id={i} color={C.med} />
-                    </View>
-                  )}
-                  <Text style={{ fontSize: ds(9.5), color: active ? C.dark : C.med, fontFamily: manrope(active ? 700 : 500), textAlign: 'center' }}>{st.label}</Text>
-                </View>
-                {i < stages.length - 1 && <View style={{ flex: 1, height: ds(3), borderRadius: ds(2), backgroundColor: i < stage ? C.primary : C.panel, marginTop: ds(16) }} />}
-              </React.Fragment>
-            );
-          })}
+        {/* current stage / prompt */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: ds(10), marginTop: ds(40) }}>
+          <StageIcon id={stage} color={STAGE_COLORS[stage]} />
+          <Txt size={22} weight={300} color={C.bordoMid}>
+            {s.cookActive ? STAGES[stage] : `${s.doneness} · ${s.count} adet`}
+          </Txt>
         </View>
 
-        {/* stop */}
-        <View style={{ marginTop: 'auto', alignItems: 'center' }}>
-          <Pressable onPress={() => nav.navigate('Menu')}>
-            <LinearGrad deg={135} colors={[C.primary, C.primaryDeep]} style={{ borderRadius: ds(26), paddingVertical: ds(13), paddingHorizontal: ds(38), flexDirection: 'row', alignItems: 'center', gap: ds(10), boxShadow: bs('0 12px 26px -8px rgba(118,145,155,0.55)') }}>
-              <Pause size={13} color="#fff" />
-              <Text style={{ color: '#fff', fontFamily: manrope(700), fontSize: ds(15), letterSpacing: -ds(0.2) }}>Durdur</Text>
-            </LinearGrad>
-          </Pressable>
-        </View>
+        {/* start / stop */}
+        <Pressable onPress={onButton} style={{ marginTop: 'auto', width: '100%' }}>
+          <LinearGrad deg={90} colors={['#ad283e', '#8a2032']} style={{ height: ds(53), borderRadius: ds(16), alignItems: 'center', justifyContent: 'center', boxShadow: bs('0 8px 16px -5px rgba(138,32,50,0.5)') }}>
+            <Txt size={22} weight={300} color="#ffffff">
+              {s.cookActive ? 'Durdur' : 'Başlat'}
+            </Txt>
+          </LinearGrad>
+        </Pressable>
       </View>
+
       <BottomNav active="cooking" onNavigate={(t) => nav.navigate(tabRoute(t))} />
     </Screen>
   );
