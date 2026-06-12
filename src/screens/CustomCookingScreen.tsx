@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Pressable } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Pressable, Animated, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { C } from '../theme/colors';
 import { ds } from '../theme/scale';
 import { bs } from '../theme/shadow';
+import { useUI } from '../theme/ui';
 import { Txt } from '../components/Txt';
 import { LinearGrad } from '../components/Gradient';
 import { useSession } from '../state/session';
@@ -13,22 +13,62 @@ import type { RootStackParamList } from '../navigation/types';
 const fill = { position: 'absolute' as const, left: 0, right: 0, top: 0, bottom: 0 };
 const f2 = (n: number) => String(n).padStart(2, '0');
 
-function Col({ value, min, max, onChange }: { value: number; min: number; max: number; onChange: (v: number) => void }) {
+// A scroll wheel: drag up/down to pick a value; it snaps to the centered row.
+const ITEM = ds(46); // row height
+const VISIBLE = 3; // rows shown (one above, the selected one, one below)
+
+function Wheel({ value, count, onChange }: { value: number; count: number; onChange: (v: number) => void }) {
+  const { C } = useUI();
+  const scrollY = useRef(new Animated.Value(value * ITEM)).current;
+  const ref = useRef<any>(null);
+  const last = useRef(value);
+
+  useEffect(() => {
+    // land on the initial value once laid out
+    const r = requestAnimationFrame(() => ref.current?.scrollTo({ y: value * ITEM, animated: false }));
+    return () => cancelAnimationFrame(r);
+  }, []);
+
+  useEffect(() => {
+    // external change (e.g. a preset chip) -> glide the wheel there
+    if (value !== last.current) {
+      last.current = value;
+      ref.current?.scrollTo({ y: value * ITEM, animated: true });
+    }
+  }, [value]);
+
+  const settle = (y: number) => {
+    const idx = Math.max(0, Math.min(count - 1, Math.round(y / ITEM)));
+    if (idx !== last.current) {
+      last.current = idx;
+      onChange(idx);
+    }
+  };
+
   return (
-    <View style={{ alignItems: 'center', width: ds(74) }}>
-      <Pressable onPress={() => value > min && onChange(value - 1)} hitSlop={8}>
-        <Txt size={22} weight={300} color="rgba(90,21,32,0.28)">
-          {value > min ? f2(value - 1) : ' '}
-        </Txt>
-      </Pressable>
-      <Txt size={44} weight={300} color={C.bordo} style={{ marginVertical: ds(4) }}>
-        {f2(value)}
-      </Txt>
-      <Pressable onPress={() => value < max && onChange(value + 1)} hitSlop={8}>
-        <Txt size={22} weight={300} color="rgba(90,21,32,0.28)">
-          {value < max ? f2(value + 1) : ' '}
-        </Txt>
-      </Pressable>
+    <View style={{ height: ITEM * VISIBLE, width: ds(74), overflow: 'hidden' }}>
+      <Animated.ScrollView
+        ref={ref}
+        showsVerticalScrollIndicator={false}
+        snapToInterval={ITEM}
+        decelerationRate="fast"
+        scrollEventThrottle={16}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+        onMomentumScrollEnd={(e) => settle(e.nativeEvent.contentOffset.y)}
+        onScrollEndDrag={(e) => settle(e.nativeEvent.contentOffset.y)}
+        contentContainerStyle={{ paddingVertical: ITEM }} // pad so first/last can center
+      >
+        {Array.from({ length: count }).map((_, i) => {
+          const inputRange = [(i - 1) * ITEM, i * ITEM, (i + 1) * ITEM];
+          const opacity = scrollY.interpolate({ inputRange, outputRange: [0.26, 1, 0.26], extrapolate: 'clamp' });
+          const scale = scrollY.interpolate({ inputRange, outputRange: [0.6, 1, 0.6], extrapolate: 'clamp' });
+          return (
+            <Animated.View key={i} style={{ height: ITEM, alignItems: 'center', justifyContent: 'center', opacity, transform: [{ scale }] }}>
+              <Txt size={40} weight={300} color={C.bordo}>{f2(i)}</Txt>
+            </Animated.View>
+          );
+        })}
+      </Animated.ScrollView>
     </View>
   );
 }
@@ -37,6 +77,7 @@ function Col({ value, min, max, onChange }: { value: number; min: number; max: n
 export function CustomCookingScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const s = useSession();
+  const { C, L } = useUI();
   const [minutes, setMinutes] = useState(s.customMin);
   const [seconds, setSeconds] = useState(s.customSec);
   const chips = [5, 10, 15];
@@ -55,19 +96,23 @@ export function CustomCookingScreen() {
         <View style={{ width: '100%', maxWidth: ds(340), backgroundColor: C.white, borderRadius: ds(28), paddingVertical: ds(24), paddingHorizontal: ds(20), boxShadow: bs('0 24px 48px -16px rgba(40,10,16,0.5)') }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: ds(76) }}>
             <Txt size={16} weight={300} color={C.gray}>
-              Dakika
+              {L('Dakika', 'Minutes')}
             </Txt>
             <Txt size={16} weight={300} color={C.gray}>
-              Saniye
+              {L('Saniye', 'Seconds')}
             </Txt>
           </View>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: ds(16), marginTop: ds(6) }}>
-            <Col value={minutes} min={0} max={30} onChange={setMinutes} />
-            <Txt size={40} weight={300} color={C.bordo} style={{ marginBottom: ds(2) }}>
-              :
-            </Txt>
-            <Col value={seconds} min={0} max={59} onChange={setSeconds} />
+          <View style={{ marginTop: ds(6) }}>
+            {/* centered selection band */}
+            <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: ITEM, height: ITEM, borderTopWidth: 1, borderBottomWidth: 1, borderColor: 'rgba(90,21,32,0.12)' }} />
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: ds(8) }}>
+              <Wheel value={minutes} count={31} onChange={setMinutes} />
+              <Txt size={40} weight={300} color={C.bordo} style={{ marginHorizontal: ds(2) }}>
+                :
+              </Txt>
+              <Wheel value={seconds} count={60} onChange={setSeconds} />
+            </View>
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: ds(10), marginTop: ds(10) }}>
@@ -83,7 +128,7 @@ export function CustomCookingScreen() {
                   style={{ paddingVertical: ds(8), paddingHorizontal: ds(16), borderRadius: ds(12), backgroundColor: active ? C.bordo : C.panelTint }}
                 >
                   <Txt size={14} weight={300} color={active ? '#ffffff' : C.bordoMid}>
-                    {c} dk
+                    {c} {L('dk', 'min')}
                   </Txt>
                 </Pressable>
               );
@@ -93,7 +138,7 @@ export function CustomCookingScreen() {
           <Pressable onPress={apply} style={{ marginTop: ds(16) }}>
             <LinearGrad deg={90} colors={['#ad283e', '#8a2032']} style={{ height: ds(50), borderRadius: ds(14), alignItems: 'center', justifyContent: 'center', boxShadow: bs('0 8px 16px -5px rgba(138,32,50,0.5)') }}>
               <Txt size={18} weight={300} color="#ffffff">
-                Uygula
+                {L('Uygula', 'Apply')}
               </Txt>
             </LinearGrad>
           </Pressable>

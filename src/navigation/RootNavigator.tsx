@@ -1,5 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useUI } from '../theme/ui';
 import type { RootStackParamList } from './types';
 import { SplashScreen } from '../screens/SplashScreen';
 import { LoginScreen } from '../screens/LoginScreen';
@@ -18,15 +19,16 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 // Custom cooking, the water warning, and the completion screen present as
 // transparent modals (popups over the screen behind them).
 export function RootNavigator() {
+  const { C } = useUI();
   return (
     <Stack.Navigator
       initialRouteName="Splash"
-      screenOptions={{ headerShown: false, animation: 'slide_from_right', contentStyle: { backgroundColor: '#faf9f9' } }}
+      screenOptions={{ headerShown: false, animation: 'none', contentStyle: { backgroundColor: C.bg } }}
     >
-      <Stack.Screen name="Splash" component={SplashScreen} options={{ animation: 'fade' }} />
-      <Stack.Screen name="Login" component={LoginScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="PairDevice" component={PairDeviceScreen} />
-      <Stack.Screen name="Menu" component={MenuScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen name="Menu" component={MenuScreen} />
       <Stack.Screen name="Cooking" component={CookingScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="History" component={HistoryScreen} />

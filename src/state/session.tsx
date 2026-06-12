@@ -6,7 +6,14 @@ export type Doneness = 'Rafadan' | 'Kayısı' | 'Katı';
 const DONENESS_MIN: Record<Doneness, number> = { Rafadan: 6, Kayısı: 8, Katı: 10 };
 
 type Session = {
-  count: number;
+  count: number; // derived: number of selected eggs
+  selectedEggs: boolean[]; // per-position on/off (6 slots)
+  toggleEgg: (i: number) => void;
+  // app-wide preferences (Profile)
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
+  lang: 'tr' | 'en';
+  toggleLang: () => void;
   doneness: Doneness;
   setDoneness: (d: Doneness) => void;
   lowWater: boolean;
@@ -30,7 +37,11 @@ const Ctx = createContext<Session | null>(null);
 // The cooking timer lives here (not in the screen) so visiting the Cooking tab
 // never auto-starts a cook, and an in-progress cook survives tab switches.
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [count] = useState(3); // device-detected in the design; fixed readout here
+  // Each egg slot is independently on/off; tapping a slot toggles it (positions matter).
+  const [selectedEggs, setSelectedEggs] = useState<boolean[]>([true, true, true, false, false, false]);
+  const count = selectedEggs.filter(Boolean).length;
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [lang, setLang] = useState<'tr' | 'en'>('tr');
   const [doneness, setDoneness] = useState<Doneness>('Rafadan');
   const [lowWater, setLowWater] = useState(true);
   const [customMin, setCM] = useState(7);
@@ -42,12 +53,22 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<Session>(
     () => ({
       count,
+      selectedEggs,
+      toggleEgg: (i: number) =>
+        setSelectedEggs((prev) => {
+          const next = prev.map((v, idx) => (idx === i ? !v : v));
+          return next.some(Boolean) ? next : prev; // always keep at least 1 egg
+        }),
+      theme,
+      toggleTheme: () => setTheme((t) => (t === 'light' ? 'dark' : 'light')),
+      lang,
+      toggleLang: () => setLang((l) => (l === 'tr' ? 'en' : 'tr')),
       doneness,
       setDoneness,
       lowWater,
       refillWater: () => setLowWater(false),
       water: '~65 ml',
-      timeLabel: `${DONENESS_MIN[doneness]} Dakika`,
+      timeLabel: `${DONENESS_MIN[doneness]} ${lang === 'en' ? 'Minutes' : 'Dakika'}`,
       durationSec,
       customMin,
       customSec,
@@ -61,7 +82,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       startCook: (totalSec) => setCook({ active: true, total: totalSec, startedAt: Date.now() }),
       stopCook: () => setCook({ active: false, total: 0, startedAt: 0 }),
     }),
-    [count, doneness, lowWater, customMin, customSec, cook, durationSec],
+    [selectedEggs, count, theme, lang, doneness, lowWater, customMin, customSec, cook, durationSec],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
