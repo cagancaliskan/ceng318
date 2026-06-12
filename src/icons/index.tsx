@@ -64,7 +64,8 @@ export const KatiIcon = ({ size = 28, color = '#000', sw = 1.8 }: IP) => (
 );
 
 // ── Egg illustration for the dial ────────────────────────────
-export const Egg = ({ size = 40, fill = '#ffffff', stroke = '#e6e2e3', sw = 1 }: { size?: number; fill?: string; stroke?: string; sw?: number }) => (
+// `shade` draws a soft curved highlight near the base for a 3D look (Figma).
+export const Egg = ({ size = 40, fill = '#ffffff', stroke = '#e6e2e3', sw = 1, shade }: { size?: number; fill?: string; stroke?: string; sw?: number; shade?: string }) => (
   <Svg width={px(size)} height={px(size * 1.3)} viewBox="0 0 40 52" fill="none">
     <Path
       d="M20 2C29 2 35 21 35 33C35 43.5 28.3 50 20 50C11.7 50 5 43.5 5 33C5 21 11 2 20 2Z"
@@ -72,6 +73,7 @@ export const Egg = ({ size = 40, fill = '#ffffff', stroke = '#e6e2e3', sw = 1 }:
       stroke={stroke}
       strokeWidth={sw}
     />
+    {shade ? <Path d="M11 36C14.5 41.5 25.5 41.5 29 36" stroke={shade} strokeWidth={1.4} strokeLinecap="round" /> : null}
   </Svg>
 );
 
@@ -126,6 +128,17 @@ export const History = ({ size = 24, color = '#000', sw = 1.8 }: IP) => (
 export const Check = ({ size = 24, color = '#fff', sw = 3 }: IP) => (
   <Svg width={px(size)} height={px(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M5 12.5l5 5L20 7" />
+  </Svg>
+);
+
+export const ChevronUp = ({ size = 22, color = '#000', sw = 2.2 }: IP) => (
+  <Svg width={px(size)} height={px(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M6 15l6-6 6 6" />
+  </Svg>
+);
+export const ChevronDown = ({ size = 22, color = '#000', sw = 2.2 }: IP) => (
+  <Svg width={px(size)} height={px(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M6 9l6 6 6-6" />
   </Svg>
 );
 

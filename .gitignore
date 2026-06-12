@@ -109,3 +109,9 @@ android/.gradle/
 *.log
 *.swp
 *~
+
+# --- Local scratch (preview screenshots, QR, throwaway driver scripts) ---
+_screens/
+_chrome-prof*/
+_cp*/
+_*.mjs

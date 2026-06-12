@@ -4,16 +4,17 @@ import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C } from '../theme/colors';
 import { ds } from '../theme/scale';
 import { hn } from '../theme/fonts';
 import { bs } from '../theme/shadow';
+import { useUI } from '../theme/ui';
 import { Txt } from '../components/Txt';
 import { LinearGrad } from '../components/Gradient';
 import { Mail, Lock, ArrowRight, Egg } from '../icons';
 import type { RootStackParamList } from '../navigation/types';
 
 function Field({ icon, placeholder, secure }: { icon: React.ReactNode; placeholder: string; secure?: boolean }) {
+  const { C } = useUI();
   return (
     <View
       style={{
@@ -42,9 +43,10 @@ function Field({ icon, placeholder, secure }: { icon: React.ReactNode; placehold
 export function LoginScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
+  const { C, L, theme } = useUI();
   return (
     <View style={{ flex: 1, backgroundColor: C.bg, paddingTop: insets.top, paddingHorizontal: ds(37) }}>
-      <StatusBar style="dark" />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
 
       {/* logo + wordmark */}
       <View style={{ alignItems: 'center', marginTop: ds(96) }}>
@@ -56,18 +58,18 @@ export function LoginScreen() {
 
       {/* fields */}
       <View style={{ marginTop: ds(58), gap: ds(32) }}>
-        <Field icon={<Mail size={24} color={C.bordo} />} placeholder="E-posta" />
-        <Field icon={<Lock size={24} color={C.bordo} />} placeholder="Şifre" secure />
+        <Field icon={<Mail size={24} color={C.bordo} />} placeholder={L('E-posta', 'Email')} />
+        <Field icon={<Lock size={24} color={C.bordo} />} placeholder={L('Şifre', 'Password')} secure />
       </View>
 
       {/* forgot / register */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: ds(26), paddingHorizontal: ds(2) }}>
         <Txt size={14} weight={300} color={C.black}>
-          Şifremi Unuttum
+          {L('Şifremi Unuttum', 'Forgot Password')}
         </Txt>
         <Pressable style={{ flexDirection: 'row', alignItems: 'center', gap: ds(4) }}>
           <Txt size={13} weight={400} color={C.bordoMid}>
-            Kayıt Ol
+            {L('Kayıt Ol', 'Sign Up')}
           </Txt>
           <ArrowRight size={18} color={C.bordoMid} sw={2} />
         </Pressable>
@@ -77,7 +79,7 @@ export function LoginScreen() {
       <Pressable onPress={() => nav.navigate('PairDevice')} style={{ marginTop: ds(46) }}>
         <LinearGrad deg={90} colors={['#ad283e', '#8a2032']} style={{ height: ds(60), borderRadius: ds(16), alignItems: 'center', justifyContent: 'center', boxShadow: bs('0 6px 14px -4px rgba(138,32,50,0.5)') }}>
           <Txt size={20} weight={300} color="#ffffff">
-            Giriş Yap
+            {L('Giriş Yap', 'Log In')}
           </Txt>
         </LinearGrad>
       </Pressable>

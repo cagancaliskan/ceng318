@@ -4,15 +4,16 @@ import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C } from '../theme/colors';
 import { ds } from '../theme/scale';
 import { bs } from '../theme/shadow';
+import { useUI } from '../theme/ui';
 import { Txt } from '../components/Txt';
 import { LinearGrad } from '../components/Gradient';
 import { Back, Bluetooth } from '../icons';
 import type { RootStackParamList } from '../navigation/types';
 
 function Ring({ size, delay }: { size: number; delay: number }) {
+  const { C } = useUI();
   const p = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const loop = Animated.loop(
@@ -47,9 +48,10 @@ function Ring({ size, delay }: { size: number; delay: number }) {
 export function PairDeviceScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
+  const { C, L, theme } = useUI();
   return (
     <View style={{ flex: 1, backgroundColor: C.bg, paddingTop: insets.top }}>
-      <StatusBar style="dark" />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
 
       <View style={{ paddingHorizontal: ds(16), paddingTop: ds(4) }}>
         <Pressable onPress={() => nav.goBack()} style={{ width: ds(40), height: ds(40), alignItems: 'center', justifyContent: 'center' }}>
@@ -59,13 +61,13 @@ export function PairDeviceScreen() {
 
       <View style={{ paddingHorizontal: ds(24), marginTop: ds(6) }}>
         <Txt size={13} weight={400} color={C.gray} ls={1.5}>
-          CİHAZ BAĞLANTISI
+          {L('CİHAZ BAĞLANTISI', 'DEVICE CONNECTION')}
         </Txt>
         <Txt size={24} weight={300} color={C.bordoMid} lh={32} style={{ marginTop: ds(6) }}>
-          EggChef cihazınızı uygulamaya bağlayın
+          {L('EggChef cihazınızı uygulamaya bağlayın', 'Connect your EggChef device to the app')}
         </Txt>
         <Txt size={13} weight={400} color={C.gray} lh={18} style={{ marginTop: ds(10) }}>
-          Cihazınızı açın ve telefonunuzu yakına getirin. Cihaz otomatik olarak bağlanacaktır.
+          {L('Cihazınızı açın ve telefonunuzu yakına getirin. Cihaz otomatik olarak bağlanacaktır.', 'Turn on your device and bring your phone close. It will connect automatically.')}
         </Txt>
       </View>
 
@@ -103,7 +105,7 @@ export function PairDeviceScreen() {
       <View style={{ paddingHorizontal: ds(21), paddingBottom: Math.max(insets.bottom, ds(20)) }}>
         <View style={{ backgroundColor: C.white, borderRadius: ds(24), padding: ds(16), boxShadow: bs('0 10px 24px -8px rgba(90,21,32,0.18), inset 0 0 0 1px rgba(90,21,32,0.06)') }}>
           <Txt size={12} weight={400} color={C.gray} ls={1}>
-            Bulunan Cihaz
+            {L('Bulunan Cihaz', 'Found Device')}
           </Txt>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: ds(12), marginTop: ds(10) }}>
             <View style={{ width: ds(50), height: ds(50), borderRadius: ds(14), backgroundColor: C.panelTint, alignItems: 'center', justifyContent: 'center' }}>
@@ -116,7 +118,7 @@ export function PairDeviceScreen() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: ds(6), marginTop: ds(3) }}>
                 <View style={{ width: ds(8), height: ds(8), borderRadius: ds(4), backgroundColor: '#3aa657' }} />
                 <Txt size={12} weight={400} color={C.gray}>
-                  Yakında- Sinyal Güçlü
+                  {L('Yakında- Sinyal Güçlü', 'Nearby — Strong Signal')}
                 </Txt>
               </View>
             </View>
@@ -125,14 +127,14 @@ export function PairDeviceScreen() {
             <LinearGrad deg={90} colors={['#ad283e', '#8a2032']} style={{ height: ds(50), borderRadius: ds(14), flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: ds(8), boxShadow: bs('0 6px 14px -4px rgba(138,32,50,0.5)') }}>
               <Bluetooth size={20} color="#fff" sw={2.4} />
               <Txt size={18} weight={300} color="#ffffff">
-                Bağlan
+                {L('Bağlan', 'Connect')}
               </Txt>
             </LinearGrad>
           </Pressable>
           <Txt center size={13} weight={400} color={C.gray} style={{ marginTop: ds(12) }}>
-            Cihaz görünmüyor mu?{' '}
+            {L('Cihaz görünmüyor mu? ', "Can't see your device? ")}
             <Txt size={13} weight={400} color={C.bordoMid}>
-              Manuel Ekle
+              {L('Manuel Ekle', 'Add Manually')}
             </Txt>
           </Txt>
         </View>

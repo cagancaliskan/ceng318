@@ -1,17 +1,21 @@
 import React from 'react';
-import { View } from 'react-native';
-import { C } from '../theme/colors';
+import { View, Pressable } from 'react-native';
 import { ds } from '../theme/scale';
 import { bs } from '../theme/shadow';
+import { useUI } from '../theme/ui';
 import { Txt } from './Txt';
 import { Egg } from '../icons';
 
 // New design: a light circle with 6 eggs around it and a big bordo "N adet" center.
-export const EggDial = React.memo(function EggDial({ count = 3, size = 276 }: { count?: number; size?: number }) {
+// Each egg slot is independently on/off — tapping one toggles just that slot, so the
+// count goes up/down by one and the specific positions matter.
+export const EggDial = React.memo(function EggDial({ selected, size = 276, onToggle }: { selected: boolean[]; size?: number; onToggle?: (i: number) => void }) {
+  const { C, L } = useUI();
   const D = ds(size);
   const r = size * 0.345; // egg-ring radius (design px)
   const eggW = 49;
   const eggH = 64;
+  const count = selected.filter(Boolean).length;
 
   return (
     <View style={{ width: D, height: D, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }}>
@@ -22,19 +26,22 @@ export const EggDial = React.memo(function EggDial({ count = 3, size = 276 }: { 
           width: D,
           height: D,
           borderRadius: D / 2,
-          backgroundColor: '#fdfcfc',
+          backgroundColor: C.white,
           boxShadow: bs('0 12px 30px -14px rgba(90,21,32,0.16), inset 0 0 0 1px rgba(90,21,32,0.07)'),
         }}
       />
 
-      {/* eggs */}
+      {/* eggs — first `count` are selected (filled); tap to change the count */}
       {Array.from({ length: 6 }).map((_, i) => {
         const a = (i * 60 * Math.PI) / 180;
         const cx = size / 2 + Math.cos(a) * r;
         const cy = size / 2 + Math.sin(a) * r;
+        const isSel = selected[i];
         return (
-          <View
+          <Pressable
             key={i}
+            onPress={() => onToggle?.(i)}
+            hitSlop={6}
             style={{
               position: 'absolute',
               left: ds(cx - eggW / 2),
@@ -43,11 +50,18 @@ export const EggDial = React.memo(function EggDial({ count = 3, size = 276 }: { 
               height: ds(eggH),
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: bs('0 6px 9px -3px rgba(60,40,45,0.18)'),
+              boxShadow: bs('0 6px 9px -3px rgba(60,40,45,0.16)'),
             }}
           >
-            <Egg size={eggW} fill={i % 2 === 0 ? '#ffffff' : '#f1eeef'} stroke="#ece7e8" sw={1} />
-          </View>
+            {/* selected eggs are filled gray; empty slots are transparent (Figma) */}
+            <Egg
+              size={eggW}
+              fill={isSel ? '#d6d3d4' : 'transparent'}
+              stroke={isSel ? '#c2bfc0' : C.grayLight}
+              sw={1.4}
+              shade={isSel ? 'rgba(0,0,0,0.07)' : 'rgba(0,0,0,0.04)'}
+            />
+          </Pressable>
         );
       })}
 
@@ -57,7 +71,7 @@ export const EggDial = React.memo(function EggDial({ count = 3, size = 276 }: { 
           {count}
         </Txt>
         <Txt size={24} weight={100} color={C.bordo} style={{ marginTop: -ds(14) }}>
-          adet
+          {L('adet', 'eggs')}
         </Txt>
       </View>
     </View>

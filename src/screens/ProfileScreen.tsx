@@ -1,23 +1,29 @@
 import React from 'react';
-import { View, Pressable } from 'react-native';
+import { View, Pressable, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { C } from '../theme/colors';
 import { ds } from '../theme/scale';
 import { bs } from '../theme/shadow';
+import { useUI } from '../theme/ui';
 import { Txt } from '../components/Txt';
 import { AppHeader } from '../components/AppHeader';
 import { BottomNav } from '../components/BottomNav';
 import { Screen } from '../components/Screen';
 import { NavProfile, Edit, History as HistoryIcon, Phone, ArrowRight } from '../icons';
 import { tabRoute } from '../navigation/helpers';
+import { useSession } from '../state/session';
 import type { RootStackParamList } from '../navigation/types';
+
+const SUPPORT_TEL = '+905396638256'; // +90 539 663 82 56
 
 // 09 · Profile (profil)
 export function ProfileScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { C, L } = useUI();
+  const s = useSession();
 
   const card = { backgroundColor: C.white, boxShadow: bs('0 4px 4px 0 rgba(0,0,0,0.08), inset 0 0 0 1px rgba(90,21,32,0.05)') };
+  const callSupport = () => Linking.openURL(`tel:${SUPPORT_TEL}`).catch(() => {});
 
   return (
     <Screen bg={C.bg} padTop={false}>
@@ -44,32 +50,40 @@ export function ProfileScreen() {
         </View>
 
         <Txt size={20} weight={300} color={C.black} style={{ marginTop: ds(24), marginBottom: ds(12) }}>
-          Tercihler
+          {L('Tercihler', 'Preferences')}
         </Txt>
 
-        {/* preference cards */}
+        {/* preference cards — both tappable */}
         <View style={{ flexDirection: 'row', gap: ds(10) }}>
-          <View style={{ ...card, flex: 1, borderRadius: ds(18), paddingVertical: ds(14), paddingHorizontal: ds(16), gap: ds(8) }}>
-            <Txt size={14} weight={300} color={C.gray}>
-              Dil
-            </Txt>
-            <Txt size={16} weight={300} color={C.black}>
-              🇹🇷 Türkçe (Tr)
-            </Txt>
-          </View>
-          <View style={{ ...card, flex: 1, borderRadius: ds(18), paddingVertical: ds(14), paddingHorizontal: ds(16), flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* language: switch toggles TR <-> EN (off = TR, on = EN) */}
+          <Pressable onPress={s.toggleLang} style={{ ...card, flex: 1, borderRadius: ds(18), paddingVertical: ds(14), paddingHorizontal: ds(16), flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ gap: ds(8) }}>
               <Txt size={14} weight={300} color={C.gray}>
-                Tema
+                {L('Dil', 'Language')}
               </Txt>
               <Txt size={16} weight={300} color={C.black}>
-                Açık
+                {s.lang === 'en' ? '🇬🇧 English' : '🇹🇷 Türkçe'}
               </Txt>
             </View>
-            <View style={{ width: ds(48), height: ds(27), borderRadius: ds(14), backgroundColor: C.bordo, justifyContent: 'center' }}>
-              <View style={{ position: 'absolute', right: ds(3), width: ds(21), height: ds(21), borderRadius: ds(11), backgroundColor: '#fff', boxShadow: bs('0 1px 3px rgba(0,0,0,0.25)') }} />
+            <View style={{ width: ds(48), height: ds(27), borderRadius: ds(14), backgroundColor: s.lang === 'en' ? C.bordo : C.grayLight, justifyContent: 'center' }}>
+              <View style={{ position: 'absolute', width: ds(21), height: ds(21), borderRadius: ds(11), backgroundColor: '#fff', boxShadow: bs('0 1px 3px rgba(0,0,0,0.25)'), ...(s.lang === 'en' ? { right: ds(3) } : { left: ds(3) }) }} />
             </View>
-          </View>
+          </Pressable>
+
+          {/* theme: tap to switch light <-> dark */}
+          <Pressable onPress={s.toggleTheme} style={{ ...card, flex: 1, borderRadius: ds(18), paddingVertical: ds(14), paddingHorizontal: ds(16), flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ gap: ds(8) }}>
+              <Txt size={14} weight={300} color={C.gray}>
+                {L('Tema', 'Theme')}
+              </Txt>
+              <Txt size={16} weight={300} color={C.black}>
+                {s.theme === 'dark' ? L('Koyu', 'Dark') : L('Açık', 'Light')}
+              </Txt>
+            </View>
+            <View style={{ width: ds(48), height: ds(27), borderRadius: ds(14), backgroundColor: s.theme === 'dark' ? C.bordo : C.grayLight, justifyContent: 'center' }}>
+              <View style={{ position: 'absolute', width: ds(21), height: ds(21), borderRadius: ds(11), backgroundColor: '#fff', boxShadow: bs('0 1px 3px rgba(0,0,0,0.25)'), ...(s.theme === 'dark' ? { right: ds(3) } : { left: ds(3) }) }} />
+            </View>
+          </Pressable>
         </View>
 
         {/* history link */}
@@ -81,18 +95,18 @@ export function ProfileScreen() {
             <HistoryIcon size={22} color={C.bordo} sw={1.8} />
           </View>
           <Txt size={18} weight={300} color={C.black}>
-            Pişirme Geçmişi
+            {L('Pişirme Geçmişi', 'Cooking History')}
           </Txt>
           <View style={{ marginLeft: 'auto' }}>
             <ArrowRight size={22} color={C.gray} sw={1.8} />
           </View>
         </Pressable>
 
-        {/* support + device id */}
-        <Pressable style={{ ...card, marginTop: 'auto', borderRadius: ds(14), paddingVertical: ds(13), paddingHorizontal: ds(16), flexDirection: 'row', alignItems: 'center', gap: ds(12) }}>
+        {/* support + device id — tap to call */}
+        <Pressable onPress={callSupport} style={{ ...card, marginTop: 'auto', borderRadius: ds(14), paddingVertical: ds(13), paddingHorizontal: ds(16), flexDirection: 'row', alignItems: 'center', gap: ds(12) }}>
           <Phone size={22} color={C.bordo} sw={1.8} />
           <Txt size={16} weight={300} color={C.black}>
-            Müşteri Hizmetleri
+            {L('Müşteri Hizmetleri', 'Customer Service')}
           </Txt>
           <View style={{ marginLeft: 'auto' }}>
             <ArrowRight size={20} color={C.gray} sw={1.8} />

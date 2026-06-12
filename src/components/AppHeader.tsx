@@ -1,14 +1,15 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C } from '../theme/colors';
 import { ds } from '../theme/scale';
 import { bs } from '../theme/shadow';
+import { useUI } from '../theme/ui';
 import { Txt } from './Txt';
 
 // White top bar that sits behind the OS status bar: "EggChef" (bordo) + greeting.
 export function AppHeader({ greeting = true }: { greeting?: boolean }) {
   const insets = useSafeAreaInsets();
+  const { C, L } = useUI();
   return (
     <View
       style={{
@@ -26,7 +27,7 @@ export function AppHeader({ greeting = true }: { greeting?: boolean }) {
       <Txt size={18} weight={300} color={C.bordoMid}>EggChef</Txt>
       {greeting && (
         <Txt size={16} weight={100} color={C.black}>
-          Merhaba, Ahmet!
+          {L('Merhaba, Ahmet!', 'Hello, Ahmet!')}
         </Txt>
       )}
     </View>
