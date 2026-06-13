@@ -10,24 +10,25 @@ import { useUI } from '../theme/ui';
 import { Txt } from '../components/Txt';
 import { Field } from '../components/Field';
 import { LinearGrad } from '../components/Gradient';
-import { Mail, Lock, ArrowRight, Egg } from '../icons';
+import { Mail, Lock, Egg, Back, NavProfile } from '../icons';
 import { useAuth, authErr } from '../state/auth';
 import type { RootStackParamList } from '../navigation/types';
 
 const ERR = '#e0556a';
 
-// 02 · Login (kullanıcı girişi)
-export function LoginScreen() {
+// Kayıt Ol — name + email + password.
+export function RegisterScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
   const { C, L, theme } = useUI();
-  const { logIn } = useAuth();
+  const { signUp } = useAuth();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const submit = () => {
-    const r = logIn(email, password);
+    const r = signUp(name, email, password);
     if (r.ok) {
       setError(null);
       nav.reset({ index: 0, routes: [{ name: 'PairDevice' }] });
@@ -40,49 +41,49 @@ export function LoginScreen() {
     <View style={{ flex: 1, backgroundColor: C.bg, paddingTop: insets.top, paddingHorizontal: ds(37) }}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
 
+      <Pressable onPress={() => nav.goBack()} style={{ width: ds(40), height: ds(40), alignItems: 'center', justifyContent: 'center', marginTop: ds(4), marginLeft: -ds(8) }}>
+        <Back size={24} color={C.bordo} />
+      </Pressable>
+
       {/* logo + wordmark */}
-      <View style={{ alignItems: 'center', marginTop: ds(96) }}>
-        <Egg size={30} fill="none" stroke={C.bordoMid} sw={2} />
-        <Txt size={42} weight={300} color={C.bordoMid} style={{ marginTop: ds(10) }}>
+      <View style={{ alignItems: 'center', marginTop: ds(20) }}>
+        <Egg size={28} fill="none" stroke={C.bordoMid} sw={2} />
+        <Txt size={38} weight={300} color={C.bordoMid} style={{ marginTop: ds(8) }}>
           EggChef
+        </Txt>
+        <Txt size={15} weight={300} color={C.gray} style={{ marginTop: ds(6) }}>
+          {L('Hesap oluştur', 'Create your account')}
         </Txt>
       </View>
 
       {/* fields */}
-      <View style={{ marginTop: ds(58), gap: ds(32) }}>
+      <View style={{ marginTop: ds(36), gap: ds(20) }}>
+        <Field icon={<NavProfile size={24} color={C.bordo} sw={1.9} />} placeholder={L('İsim', 'Name')} value={name} onChangeText={setName} autoCapitalize="words" />
         <Field icon={<Mail size={24} color={C.bordo} />} placeholder={L('E-posta', 'Email')} value={email} onChangeText={setEmail} keyboardType="email-address" />
         <Field icon={<Lock size={24} color={C.bordo} />} placeholder={L('Şifre', 'Password')} value={password} onChangeText={setPassword} secure />
       </View>
 
-      {/* forgot / register */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: ds(26), paddingHorizontal: ds(2) }}>
-        <Pressable onPress={() => nav.navigate('ForgotPassword')}>
-          <Txt size={14} weight={300} color={C.black}>
-            {L('Şifremi Unuttum', 'Forgot Password')}
-          </Txt>
-        </Pressable>
-        <Pressable onPress={() => nav.navigate('Register')} style={{ flexDirection: 'row', alignItems: 'center', gap: ds(4) }}>
-          <Txt size={13} weight={400} color={C.bordoMid}>
-            {L('Kayıt Ol', 'Sign Up')}
-          </Txt>
-          <ArrowRight size={18} color={C.bordoMid} sw={2} />
-        </Pressable>
-      </View>
-
-      {/* error */}
       {error && (
-        <Txt size={13} weight={400} color={ERR} style={{ marginTop: ds(18) }}>
+        <Txt size={13} weight={400} color={ERR} style={{ marginTop: ds(16) }}>
           {error}
         </Txt>
       )}
 
-      {/* submit */}
-      <Pressable onPress={submit} style={{ marginTop: error ? ds(14) : ds(46) }}>
+      <Pressable onPress={submit} style={{ marginTop: error ? ds(14) : ds(36) }}>
         <LinearGrad deg={90} colors={['#ad283e', '#8a2032']} style={{ height: ds(60), borderRadius: ds(16), alignItems: 'center', justifyContent: 'center', boxShadow: bs('0 6px 14px -4px rgba(138,32,50,0.5)') }}>
           <Txt size={20} weight={300} color="#ffffff">
-            {L('Giriş Yap', 'Log In')}
+            {L('Kayıt Ol', 'Sign Up')}
           </Txt>
         </LinearGrad>
+      </Pressable>
+
+      <Pressable onPress={() => nav.goBack()} style={{ marginTop: ds(20), alignItems: 'center' }}>
+        <Txt size={14} weight={300} color={C.gray}>
+          {L('Zaten hesabın var mı? ', 'Already have an account? ')}
+          <Txt size={14} weight={400} color={C.bordoMid}>
+            {L('Giriş Yap', 'Log In')}
+          </Txt>
+        </Txt>
       </Pressable>
     </View>
   );

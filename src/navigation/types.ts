@@ -3,6 +3,8 @@
 export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
   PairDevice: undefined;
   Menu: undefined;
   Cooking: { minutes?: number; seconds?: number; count?: number } | undefined;
