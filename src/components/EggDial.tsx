@@ -50,7 +50,6 @@ export const EggDial = React.memo(function EggDial({ selected, size = 276, onTog
               height: ds(eggH),
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: bs('0 6px 9px -3px rgba(60,40,45,0.16)'),
             }}
           >
             {/* selected eggs are filled gray; empty slots are transparent (Figma) */}

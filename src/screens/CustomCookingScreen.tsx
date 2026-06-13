@@ -12,6 +12,7 @@ import type { RootStackParamList } from '../navigation/types';
 
 const fill = { position: 'absolute' as const, left: 0, right: 0, top: 0, bottom: 0 };
 const f2 = (n: number) => String(n).padStart(2, '0');
+const ERR = '#e0556a';
 
 // A scroll wheel: drag up/down to pick a value; it snaps to the centered row.
 const ITEM = ds(46); // row height
@@ -80,11 +81,23 @@ export function CustomCookingScreen() {
   const { C, L } = useUI();
   const [minutes, setMinutes] = useState(s.customMin);
   const [seconds, setSeconds] = useState(s.customSec);
+  const [error, setError] = useState<string | null>(null);
   const chips = [5, 10, 15];
 
+  // clear the warning whenever the picked time changes
+  useEffect(() => setError(null), [minutes, seconds]);
+
   const apply = () => {
+    const total = minutes * 60 + seconds;
+    const waterSec = s.count * 5; // water-drawing: 5s per egg (the first part of the total)
+    // total must exceed the water time, otherwise there's no room to heat & boil
+    if (total <= waterSec) {
+      setError(L(`${s.count} yumurta için ${waterSec} sn'den uzun seçin (su ${waterSec} sn sürer).`, `Pick more than ${waterSec}s for ${s.count} eggs (water takes ${waterSec}s).`));
+      return;
+    }
+    setError(null);
     s.setCustom(minutes, seconds);
-    s.startCook(minutes * 60 + seconds);
+    s.startCook(total);
     nav.navigate('Cooking');
   };
 
@@ -135,7 +148,13 @@ export function CustomCookingScreen() {
             })}
           </View>
 
-          <Pressable onPress={apply} style={{ marginTop: ds(16) }}>
+          {error && (
+            <Txt center size={13} weight={400} color={ERR} style={{ marginTop: ds(12) }}>
+              {error}
+            </Txt>
+          )}
+
+          <Pressable onPress={apply} style={{ marginTop: error ? ds(12) : ds(16) }}>
             <LinearGrad deg={90} colors={['#ad283e', '#8a2032']} style={{ height: ds(50), borderRadius: ds(14), alignItems: 'center', justifyContent: 'center', boxShadow: bs('0 8px 16px -5px rgba(138,32,50,0.5)') }}>
               <Txt size={18} weight={300} color="#ffffff">
                 {L('Uygula', 'Apply')}
