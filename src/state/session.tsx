@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useMemo } from 'react';
 
 export type Doneness = 'Rafadan' | 'Kayısı' | 'Katı';
 
+// A recorded cook (added the moment a cook is started). Newest first.
+export type CookEntry = { at: number; count: number; doneness: Doneness };
+
 // Cook duration per doneness, in minutes (Rafadan soft → Katı hard).
 const DONENESS_MIN: Record<Doneness, number> = { Rafadan: 6, Kayısı: 8, Katı: 10 };
 
@@ -30,6 +33,8 @@ type Session = {
   cookStartedAt: number; // ms epoch
   startCook: (totalSec: number) => void;
   stopCook: () => void;
+  // cook history — recorded at start; shown in the History screen above the seed rows
+  history: CookEntry[];
 };
 
 const Ctx = createContext<Session | null>(null);
@@ -47,6 +52,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [customMin, setCM] = useState(7);
   const [customSec, setCS] = useState(45);
   const [cook, setCook] = useState({ active: false, total: 0, startedAt: 0 });
+  const [history, setHistory] = useState<CookEntry[]>([]);
 
   const durationSec = DONENESS_MIN[doneness] * 60;
 
@@ -79,10 +85,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       cookActive: cook.active,
       cookTotal: cook.total,
       cookStartedAt: cook.startedAt,
-      startCook: (totalSec) => setCook({ active: true, total: totalSec, startedAt: Date.now() }),
+      startCook: (totalSec) => {
+        const now = Date.now();
+        setCook({ active: true, total: totalSec, startedAt: now });
+        setHistory((prev) => [{ at: now, count, doneness }, ...prev]);
+      },
       stopCook: () => setCook({ active: false, total: 0, startedAt: 0 }),
+      history,
     }),
-    [selectedEggs, count, theme, lang, doneness, lowWater, customMin, customSec, cook, durationSec],
+    [selectedEggs, count, theme, lang, doneness, lowWater, customMin, customSec, cook, durationSec, history],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

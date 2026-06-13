@@ -4,6 +4,8 @@ import { useUI } from '../theme/ui';
 import type { RootStackParamList } from './types';
 import { SplashScreen } from '../screens/SplashScreen';
 import { LoginScreen } from '../screens/LoginScreen';
+import { RegisterScreen } from '../screens/RegisterScreen';
+import { ForgotPasswordScreen } from '../screens/ForgotPasswordScreen';
 import { PairDeviceScreen } from '../screens/PairDeviceScreen';
 import { MenuScreen } from '../screens/MenuScreen';
 import { CookingScreen } from '../screens/CookingScreen';
@@ -27,6 +29,8 @@ export function RootNavigator() {
     >
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="PairDevice" component={PairDeviceScreen} />
       <Stack.Screen name="Menu" component={MenuScreen} />
       <Stack.Screen name="Cooking" component={CookingScreen} />

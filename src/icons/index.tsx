@@ -167,6 +167,20 @@ export const Lock = ({ size = 24, color = '#000', sw = 1.9 }: IP) => (
   </Svg>
 );
 
+export const Eye = ({ size = 24, color = '#000', sw = 1.9 }: IP) => (
+  <Svg width={px(size)} height={px(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" />
+    <Circle cx={12} cy={12} r={3} />
+  </Svg>
+);
+export const EyeOff = ({ size = 24, color = '#000', sw = 1.9 }: IP) => (
+  <Svg width={px(size)} height={px(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" />
+    <Circle cx={12} cy={12} r={3} />
+    <Path d="M3 3l18 18" />
+  </Svg>
+);
+
 export const Bluetooth = ({ size = 24, color = '#fff', sw = 2.2 }: IP) => (
   <Svg width={px(size)} height={px(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M7 8l10 8-5 4V4l5 4-10 8" />
@@ -176,6 +190,13 @@ export const Bluetooth = ({ size = 24, color = '#fff', sw = 2.2 }: IP) => (
 export const Edit = ({ size = 24, color = '#fff', sw = 2 }: IP) => (
   <Svg width={px(size)} height={px(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
     <Path d="M4 20l4-1L20 7l-3-3L5 16l-1 4z" />
+  </Svg>
+);
+export const LogOut = ({ size = 24, color = '#000', sw = 1.9 }: IP) => (
+  <Svg width={px(size)} height={px(size)} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M9 4H6a2 2 0 00-2 2v12a2 2 0 002 2h3" />
+    <Path d="M16 17l5-5-5-5" />
+    <Path d="M21 12H9" />
   </Svg>
 );
 export const Phone = ({ size = 24, color = '#000', sw = 1.9 }: IP) => (

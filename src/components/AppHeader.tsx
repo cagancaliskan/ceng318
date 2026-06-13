@@ -4,12 +4,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ds } from '../theme/scale';
 import { bs } from '../theme/shadow';
 import { useUI } from '../theme/ui';
+import { useAuth } from '../state/auth';
 import { Txt } from './Txt';
 
 // White top bar that sits behind the OS status bar: "EggChef" (bordo) + greeting.
 export function AppHeader({ greeting = true }: { greeting?: boolean }) {
   const insets = useSafeAreaInsets();
   const { C, L } = useUI();
+  const { currentUser } = useAuth();
+  const name = currentUser?.name?.split(' ')[0] ?? '';
   return (
     <View
       style={{
@@ -27,7 +30,7 @@ export function AppHeader({ greeting = true }: { greeting?: boolean }) {
       <Txt size={18} weight={300} color={C.bordoMid}>EggChef</Txt>
       {greeting && (
         <Txt size={16} weight={100} color={C.black}>
-          {L('Merhaba, Ahmet!', 'Hello, Ahmet!')}
+          {name ? L(`Merhaba, ${name}!`, `Hello, ${name}!`) : L('Merhaba!', 'Hello!')}
         </Txt>
       )}
     </View>

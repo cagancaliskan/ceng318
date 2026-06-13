@@ -9,7 +9,7 @@ import { bs } from '../theme/shadow';
 import { useUI } from '../theme/ui';
 import { Txt } from '../components/Txt';
 import { LinearGrad } from '../components/Gradient';
-import { Back, Bluetooth } from '../icons';
+import { Bluetooth } from '../icons';
 import type { RootStackParamList } from '../navigation/types';
 
 function Ring({ size, delay }: { size: number; delay: number }) {
@@ -53,13 +53,7 @@ export function PairDeviceScreen() {
     <View style={{ flex: 1, backgroundColor: C.bg, paddingTop: insets.top }}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
 
-      <View style={{ paddingHorizontal: ds(16), paddingTop: ds(4) }}>
-        <Pressable onPress={() => nav.goBack()} style={{ width: ds(40), height: ds(40), alignItems: 'center', justifyContent: 'center' }}>
-          <Back size={24} color={C.bordo} />
-        </Pressable>
-      </View>
-
-      <View style={{ paddingHorizontal: ds(24), marginTop: ds(6) }}>
+      <View style={{ paddingHorizontal: ds(24), marginTop: ds(24) }}>
         <Txt size={13} weight={400} color={C.gray} ls={1.5}>
           {L('CİHAZ BAĞLANTISI', 'DEVICE CONNECTION')}
         </Txt>
