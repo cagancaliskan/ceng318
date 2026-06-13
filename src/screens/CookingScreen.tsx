@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Pressable } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Pressable, Animated, Easing } from 'react-native';
 import Svg, { Defs, LinearGradient as SvgLinear, Stop, Circle, Path } from 'react-native-svg';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -44,6 +44,25 @@ function StageIcon({ id, color, size = 26 }: { id: number; color: string; size?:
   );
 }
 
+// Expanding ring that pulses around the CURRENT stage's icon, so it's clear the
+// progress has reached that icon.
+function Pulse({ color }: { color: string }) {
+  const p = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(Animated.timing(p, { toValue: 1, duration: 1300, easing: Easing.out(Easing.ease), useNativeDriver: true }));
+    loop.start();
+    return () => loop.stop();
+  }, [p]);
+  const scale = p.interpolate({ inputRange: [0, 1], outputRange: [1, 1.85] });
+  const opacity = p.interpolate({ inputRange: [0, 1], outputRange: [0.6, 0] });
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{ position: 'absolute', width: ds(46), height: ds(46), borderRadius: ds(23), borderWidth: 2, borderColor: color, opacity, transform: [{ scale }] }}
+    />
+  );
+}
+
 // 05 · Cooking (su alıyor / ısınıyor / haşlanıyor). Counts down only while a cook
 // is active; the tab shows an idle "Başlat" state otherwise.
 export function CookingScreen() {
@@ -62,8 +81,24 @@ export function CookingScreen() {
   const elapsed = s.cookActive ? Math.floor((Date.now() - s.cookStartedAt) / 1000) : 0;
   const total = s.cookActive ? s.cookTotal : s.durationSec;
   const remaining = Math.max(0, total - elapsed);
-  const progress = s.cookActive && total > 0 ? Math.min(1, elapsed / total) : 0;
-  const stage = progress >= 0.66 ? 2 : progress >= 0.33 ? 1 : 0;
+  const lowTime = s.cookActive && remaining <= 15; // last 15s: highlight the timer (any scenario)
+
+  // timing: water-drawing takes 5s per egg; heating + boiling split the rest evenly.
+  const waterSec = s.count * 5;
+  const heatDur = Math.max(0, (total - waterSec) / 2);
+  const stage = !s.cookActive ? 0 : elapsed < waterSec ? 0 : elapsed < waterSec + heatDur ? 1 : 2;
+
+  // Icons stay fixed at 0°/60°/120° (= 0, 1/6, 1/3 of the ring). The bar fills so its
+  // head reaches each icon exactly when that stage begins — water→heat over `waterSec`
+  // (egg count × 5s), heat→boil over `heatDur`, then boil→full over the rest.
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * Math.min(1, Math.max(0, t));
+  let progress = 0;
+  if (s.cookActive && total > 0) {
+    if (total <= waterSec) progress = elapsed / total; // all-water edge: fill linearly
+    else if (elapsed <= waterSec) progress = lerp(0, 1 / 6, elapsed / waterSec);
+    else if (elapsed <= waterSec + heatDur) progress = lerp(1 / 6, 1 / 3, (elapsed - waterSec) / heatDur);
+    else progress = lerp(1 / 3, 1, (elapsed - waterSec - heatDur) / heatDur);
+  }
 
   useEffect(() => {
     if (focused && s.cookActive && remaining === 0) {
@@ -72,19 +107,20 @@ export function CookingScreen() {
     }
   }, [focused, s.cookActive, remaining, nav]);
 
-  // ring geometry. The stage bubbles sit on the LEFT arc (pt, below); the PROGRESS
-  // sweeps CLOCKWISE from the top (right side fills first) to match the Figma design.
+  // ring geometry. Progress sweeps CLOCKWISE from the top; the stage bubbles sit on
+  // the RIGHT arc (same direction) so the sweep passes them in order: water → heat → boil.
   const cx = ds(150);
   const cy = ds(150);
   const Rr = ds(132);
-  const pt = (phi: number) => ({ x: cx - Rr * Math.sin(phi), y: cy - Rr * Math.cos(phi) });
+  const pt = (phi: number) => ({ x: cx + Rr * Math.sin(phi), y: cy - Rr * Math.cos(phi) });
   const sweep = Math.min(progress, 0.9999) * Math.PI * 2;
   const p0 = { x: cx, y: cy - Rr };
   const pe = { x: cx + Rr * Math.sin(sweep), y: cy - Rr * Math.cos(sweep) };
   const largeArc = sweep > Math.PI ? 1 : 0;
   const dPath = `M ${p0.x} ${p0.y} A ${Rr} ${Rr} 0 ${largeArc} 1 ${pe.x} ${pe.y}`;
 
-  // 3 stage-legend bubbles clustered on the upper-left arc (matches the Figma).
+  // 3 stage icons fixed, leaning right: water top (0°), heat upper-right (60°), boil
+  // lower-right (120°). The bar (above) is timed to reach each one as its stage starts.
   const bubbles = [
     { id: 0, color: '#2f7ad1', phi: 0 },
     { id: 1, color: '#e0a52a', phi: Math.PI / 3 },
@@ -138,6 +174,7 @@ export function CookingScreen() {
                   boxShadow: bs('0 4px 10px -3px rgba(0,0,0,0.18)'),
                 }}
               >
+                {s.cookActive && stage === b.id && <Pulse color={b.color} />}
                 <StageIcon id={b.id} color={b.color} size={22} />
               </View>
             );
@@ -145,11 +182,11 @@ export function CookingScreen() {
 
           {/* center readout */}
           <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-            {/* gray while filling/heating; turns bordo once boiling (stage 2) starts */}
-            <Txt size={64} weight={100} color={s.cookActive && stage >= 2 ? C.bordo : C.gray} style={{ lineHeight: ds(70) }}>
+            {/* both turn bordo (prominent) in the last 15 seconds, in any scenario */}
+            <Txt size={64} weight={100} color={lowTime ? C.bordo : C.gray} style={{ lineHeight: ds(70) }}>
               {fmt(remaining)}
             </Txt>
-            <Txt size={20} weight={300} color={C.gray} style={{ marginTop: ds(2) }}>
+            <Txt size={20} weight={300} color={lowTime ? C.bordo : C.gray} style={{ marginTop: ds(2) }}>
               {s.cookActive ? L('kaldı', 'left') : L('hazır', 'ready')}
             </Txt>
           </View>

@@ -125,12 +125,6 @@ export function PairDeviceScreen() {
               </Txt>
             </LinearGrad>
           </Pressable>
-          <Txt center size={13} weight={400} color={C.gray} style={{ marginTop: ds(12) }}>
-            {L('Cihaz görünmüyor mu? ', "Can't see your device? ")}
-            <Txt size={13} weight={400} color={C.bordoMid}>
-              {L('Manuel Ekle', 'Add Manually')}
-            </Txt>
-          </Txt>
         </View>
       </View>
     </View>

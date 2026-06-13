@@ -98,8 +98,8 @@ export function MenuScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: ds(12) }}>
             <WaterDrop size={26} color={C.bordo} sw={1.7} />
             <Txt size={12} weight={400} color={C.black} style={{ flex: 1 }}>
-              {L('Haznedeki Su Miktarı: ', 'Water in Tank: ')}
-              <Txt size={12} weight={500} color={C.bordo}>{s.water}</Txt> {L('(Otomatik Eklenecek)', '(Auto-filled)')}
+              {L('Haznedeki Su Miktarı ', 'Water in Tank ')}
+              <Txt size={12} weight={500} color={C.bordo}>{L('(Otomatik Eklenecek)', '(Auto-filled)')}</Txt>
             </Txt>
           </View>
           <View style={{ height: 1, backgroundColor: 'rgba(90,21,32,0.10)', marginVertical: ds(10) }} />
