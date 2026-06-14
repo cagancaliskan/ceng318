@@ -9,11 +9,10 @@ import { bs } from '../theme/shadow';
 import { useUI } from '../theme/ui';
 import { Txt } from '../components/Txt';
 import { LinearGrad } from '../components/Gradient';
-import { Bluetooth } from '../icons';
+import { Bluetooth, Egg } from '../icons';
 import type { RootStackParamList } from '../navigation/types';
 
 function Ring({ size, delay }: { size: number; delay: number }) {
-  const { C } = useUI();
   const p = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const loop = Animated.loop(
@@ -23,7 +22,7 @@ function Ring({ size, delay }: { size: number; delay: number }) {
     return () => loop.stop();
   }, [p, delay]);
   const scale = p.interpolate({ inputRange: [0, 1], outputRange: [0.55, 1.25] });
-  const op = p.interpolate({ inputRange: [0, 0.25, 1], outputRange: [0, 0.45, 0] });
+  const op = p.interpolate({ inputRange: [0, 0.25, 1], outputRange: [0, 0.5, 0] });
   return (
     <Animated.View
       style={{
@@ -36,7 +35,7 @@ function Ring({ size, delay }: { size: number; delay: number }) {
         marginTop: -ds(size / 2),
         borderRadius: ds(size / 2),
         borderWidth: 1.5,
-        borderColor: C.bordo,
+        borderColor: 'rgba(255,255,255,0.32)',
         opacity: op,
         transform: [{ scale }],
       }}
@@ -44,23 +43,23 @@ function Ring({ size, delay }: { size: number; delay: number }) {
   );
 }
 
-// 13 · Cihaz Bağlama (Pair Device)
+// 13 · Cihaz Bağlama (Pair Device) — bordo gradient to match the login (Figma).
 export function PairDeviceScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
-  const { C, L, theme } = useUI();
+  const { C, L } = useUI();
   return (
-    <View style={{ flex: 1, backgroundColor: C.bg, paddingTop: insets.top }}>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+    <LinearGrad deg={180} colors={['#581321', '#8e2238', '#c0485f']} locations={[0, 0.55, 1]} style={{ flex: 1, paddingTop: insets.top }}>
+      <StatusBar style="light" />
 
       <View style={{ paddingHorizontal: ds(24), marginTop: ds(24) }}>
-        <Txt size={13} weight={400} color={C.gray} ls={1.5}>
+        <Txt size={13} weight={400} color="rgba(255,255,255,0.75)" ls={1.5}>
           {L('CİHAZ BAĞLANTISI', 'DEVICE CONNECTION')}
         </Txt>
-        <Txt size={24} weight={300} color={C.bordoMid} lh={32} style={{ marginTop: ds(6) }}>
+        <Txt size={24} weight={300} color="#ffffff" lh={32} style={{ marginTop: ds(6) }}>
           {L('EggChef cihazınızı uygulamaya bağlayın', 'Connect your EggChef device to the app')}
         </Txt>
-        <Txt size={13} weight={400} color={C.gray} lh={18} style={{ marginTop: ds(10) }}>
+        <Txt size={13} weight={400} color="rgba(255,255,255,0.85)" lh={18} style={{ marginTop: ds(10) }}>
           {L('Cihazınızı açın ve telefonunuzu yakına getirin. Cihaz otomatik olarak bağlanacaktır.', 'Turn on your device and bring your phone close. It will connect automatically.')}
         </Txt>
       </View>
@@ -86,10 +85,14 @@ export function PairDeviceScreen() {
             boxShadow: bs('0 16px 30px -10px rgba(90,21,32,0.22), inset 0 0 0 1px rgba(90,21,32,0.06)'),
           }}
         >
-          <LinearGrad deg={135} colors={['#ad283e', C.bordo]} style={{ width: ds(72), height: ds(72), borderRadius: ds(22), alignItems: 'center', justifyContent: 'center', boxShadow: bs('0 8px 16px -4px rgba(138,32,50,0.5)') }}>
-            <Bluetooth size={36} color="#fff" sw={2.2} />
-          </LinearGrad>
-          <Txt size={20} weight={300} color={C.bordoMid} style={{ marginTop: ds(12) }}>
+          {/* gray egg with a Bluetooth glyph */}
+          <View style={{ width: ds(76), height: ds(76), alignItems: 'center', justifyContent: 'center' }}>
+            <Egg size={52} fill="#d9d6d7" stroke="#c7c4c5" sw={1.4} />
+            <View style={{ position: 'absolute' }} pointerEvents="none">
+              <Bluetooth size={26} color="#8a8488" sw={2.2} />
+            </View>
+          </View>
+          <Txt size={20} weight={300} color={C.gray} style={{ marginTop: ds(10) }}>
             EggChef
           </Txt>
         </View>
@@ -97,13 +100,13 @@ export function PairDeviceScreen() {
 
       {/* found-device card */}
       <View style={{ paddingHorizontal: ds(21), paddingBottom: Math.max(insets.bottom, ds(20)) }}>
-        <View style={{ backgroundColor: C.white, borderRadius: ds(24), padding: ds(16), boxShadow: bs('0 10px 24px -8px rgba(90,21,32,0.18), inset 0 0 0 1px rgba(90,21,32,0.06)') }}>
+        <View style={{ backgroundColor: C.white, borderRadius: ds(24), padding: ds(16), boxShadow: bs('0 10px 24px -8px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(90,21,32,0.06)') }}>
           <Txt size={12} weight={400} color={C.gray} ls={1}>
             {L('Bulunan Cihaz', 'Found Device')}
           </Txt>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: ds(12), marginTop: ds(10) }}>
             <View style={{ width: ds(50), height: ds(50), borderRadius: ds(14), backgroundColor: C.panelTint, alignItems: 'center', justifyContent: 'center' }}>
-              <Bluetooth size={24} color={C.bordo} sw={2} />
+              <Egg size={30} fill="#ffffff" stroke={C.grayLight} sw={1.4} />
             </View>
             <View style={{ flex: 1 }}>
               <Txt size={15} weight={400} color={C.black}>
@@ -127,6 +130,6 @@ export function PairDeviceScreen() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </LinearGrad>
   );
 }
