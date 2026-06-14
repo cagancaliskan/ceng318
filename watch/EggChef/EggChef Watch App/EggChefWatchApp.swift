@@ -3,18 +3,13 @@ import WatchKit
 
 // ============================================================================
 //  EggChef — native watchOS app (single file, SwiftUI).
-//  Every screen is pinned to the EXACT watch screen size, so nothing ever scrolls
-//  (watchOS makes overflowing root content crown-scrollable — pinning the height
-//  removes that). Full-screen state machine, no NavigationStack chrome. Swipe from
-//  the left edge to go back. Pixel-matched to watch/figma. Bordo theme + Dark Mode.
-//  Standalone demo; countdown is demo-accelerated (~20s).
+//  Every screen is pinned to the EXACT watch screen size, so nothing ever scrolls.
+//  Full-screen state machine; back = top-left chevron or left-edge swipe.
 // ============================================================================
 
 private let kScreen = WKInterfaceDevice.current().screenBounds.size
 
 extension View {
-    // Pin to the real watch screen AND ignore the safe area, so the frame occupies the
-    // full screen exactly (no status-bar inset overflow) → nothing can scroll.
     func fitScreen() -> some View { frame(width: kScreen.width, height: kScreen.height).ignoresSafeArea() }
 }
 
@@ -96,6 +91,20 @@ struct RootView: View {
             s.theme.screen.ignoresSafeArea()
             if showSplash { SplashView() } else { screenView }
 
+            // Back button — visible on every pushed screen (Profile has its own ✕).
+            if !showSplash && current != .main && current != .profile && !s.showWaterWarn && !s.showDone {
+                Button(action: back) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(s.theme.gray)
+                        .frame(width: 30, height: 30)
+                        .background(Circle().fill(s.theme.profileCard.opacity(0.85)))
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.leading, 6).padding(.top, 2)
+            }
+
             if s.showWaterWarn {
                 WaterWarnOverlay(s: s) { s.lowWater = false; s.showWaterWarn = false }
             }
@@ -120,7 +129,7 @@ struct RootView: View {
         case .count:     CountView(s: s, onNext: { go(.doneness) })
         case .doneness:  DonenessView(s: s, onWater: { go(.water) }, onCustom: { go(.custom) })
         case .custom:    CustomView(s: s, onApply: { go(.water) })
-        case .water:     WaterView(s: s)
+        case .water:     WaterView(s: s, onStart: { go(.countdown) })
         case .countdown: CountdownView(s: s)
         case .profile:   ProfileView(s: s, onClose: { back() })
         }
@@ -143,7 +152,7 @@ struct Bordo: ButtonStyle {
     }
 }
 
-// MARK: - Egg silhouette — the exact path from the approved web demo (viewBox 40×53)
+// MARK: - Egg silhouette (viewBox 40×53)
 struct EggShape: Shape {
     func path(in r: CGRect) -> Path {
         let sx = r.width / 40.0, sy = r.height / 53.0
@@ -159,7 +168,6 @@ struct EggShape: Shape {
     }
 }
 
-// One dial egg: selected = white, unselected = gray, with a soft shadow.
 struct DialEgg: View {
     var selected: Bool
     var t: Theme
@@ -167,7 +175,7 @@ struct DialEgg: View {
         EggShape()
             .fill(selected ? Color.white : t.egg)
             .overlay(EggShape().stroke(Color.black.opacity(0.08), lineWidth: 0.8))
-            .frame(width: 19, height: 25)
+            .frame(width: 23, height: 30)
             .shadow(color: .black.opacity(0.22), radius: 2.5, y: 2)
     }
 }
@@ -176,9 +184,9 @@ struct RafadanIcon: View {
     var c: Color
     var body: some View {
         ZStack {
-            Ellipse().stroke(c, lineWidth: 1.7).frame(width: 26, height: 20)
-            Circle().stroke(c, lineWidth: 1.7).frame(width: 9, height: 9).offset(x: -2.5, y: -1)
-        }.frame(width: 28, height: 24)
+            Ellipse().stroke(c, lineWidth: 1.9).frame(width: 34, height: 26)
+            Circle().stroke(c, lineWidth: 1.9).frame(width: 12, height: 12).offset(x: -3, y: -1.5)
+        }.frame(width: 38, height: 30)
     }
 }
 struct KayisiIcon: View {
@@ -186,19 +194,19 @@ struct KayisiIcon: View {
     var body: some View {
         ZStack {
             ForEach(0..<8, id: \.self) { i in
-                Capsule().fill(c).frame(width: 2, height: 5).offset(y: -11).rotationEffect(.degrees(Double(i) * 45))
+                Capsule().fill(c).frame(width: 2.5, height: 6).offset(y: -14).rotationEffect(.degrees(Double(i) * 45))
             }
-            Circle().stroke(c, lineWidth: 1.7).frame(width: 10, height: 10)
-        }.frame(width: 28, height: 24)
+            Circle().stroke(c, lineWidth: 1.9).frame(width: 13, height: 13)
+        }.frame(width: 38, height: 30)
     }
 }
 struct KatiIcon: View {
     var c: Color
     var body: some View {
         ZStack {
-            Circle().stroke(c, lineWidth: 1.7).frame(width: 23, height: 23)
-            Circle().stroke(c, lineWidth: 1.7).frame(width: 9, height: 9)
-        }.frame(width: 28, height: 24)
+            Circle().stroke(c, lineWidth: 1.9).frame(width: 30, height: 30)
+            Circle().stroke(c, lineWidth: 1.9).frame(width: 12, height: 12)
+        }.frame(width: 38, height: 30)
     }
 }
 
@@ -271,19 +279,19 @@ struct EggDial: View {
     @ObservedObject var s: CookSession
     var body: some View {
         let t = s.theme
-        let R: CGFloat = 36
+        let R: CGFloat = 44
         ZStack {
-            Circle().fill(t.plate).frame(width: 104, height: 104).shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+            Circle().fill(t.plate).frame(width: 130, height: 130).shadow(color: .black.opacity(0.12), radius: 9, y: 5)
             ForEach(0..<6, id: \.self) { i in
                 let ang = (Double(i) * 60.0 - 60.0) * .pi / 180.0
                 DialEgg(selected: i < s.count, t: t).offset(x: R * CGFloat(cos(ang)), y: R * CGFloat(sin(ang)))
             }
             VStack(spacing: -2) {
-                Text("\(s.count)").font(.system(size: 30, weight: .light)).foregroundColor(t.bordo)
-                Text("adet").font(.system(size: 12, weight: .light)).foregroundColor(t.gray)
+                Text("\(s.count)").font(.system(size: 40, weight: .light)).foregroundColor(t.bordo)
+                Text("adet").font(.system(size: 14, weight: .light)).foregroundColor(t.gray)
             }
         }
-        .frame(width: 114, height: 114)
+        .frame(width: 144, height: 144)
         .contentShape(Rectangle())
         .onTapGesture { s.cycleCount() }
     }
@@ -298,7 +306,7 @@ struct DonenessView: View {
         let t = s.theme
         VStack(spacing: 4) {
             Spacer(minLength: 0)
-            Text("Hızlı Pişirme").font(.system(size: 15, weight: .light)).foregroundColor(t.gray)
+            Text("Hızlı Pişirme").font(.system(size: 16, weight: .light)).foregroundColor(t.gray)
             ZStack {
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
@@ -307,7 +315,7 @@ struct DonenessView: View {
                     }
                     HStack(spacing: 0) {
                         cell(label: "Katı") { AnyView(KatiIcon(c: t.gray)) } tap: { s.doneness = "Katı"; onWater() }
-                        cell(label: "Özel") { AnyView(Text(s.customLabel()).font(.system(size: 20, weight: .light)).foregroundColor(t.bordo)) } tap: { onCustom() }
+                        cell(label: "Özel") { AnyView(Text(s.customLabel()).font(.system(size: 26, weight: .light)).foregroundColor(t.bordo)) } tap: { onCustom() }
                     }
                 }
                 Rectangle().fill(t.line).frame(width: 1).padding(.vertical, 10)
@@ -321,10 +329,10 @@ struct DonenessView: View {
     private func cell(label: String, @ViewBuilder icon: () -> AnyView, tap: @escaping () -> Void) -> some View {
         let t = s.theme
         return Button(action: tap) {
-            VStack(spacing: 4) {
-                icon().frame(height: 24)
-                Text(label).font(.system(size: 12, weight: .light)).foregroundColor(t.ink)
-            }.frame(maxWidth: .infinity).padding(.vertical, 6)
+            VStack(spacing: 6) {
+                icon().frame(height: 34)
+                Text(label).font(.system(size: 14, weight: .light)).foregroundColor(t.ink)
+            }.frame(maxWidth: .infinity).padding(.vertical, 10)
         }.buttonStyle(.plain)
     }
 }
@@ -344,7 +352,7 @@ struct CustomView: View {
                     Picker("", selection: $s.customSec) { ForEach(0..<60, id: \.self) { Text(String(format: "%02d", $0)).tag($0) } }.labelsHidden().frame(width: 56)
                 }
                 .frame(height: 82).padding(.top, 4).background(Color.white)
-                Button(action: onApply) {
+                Button(action: { s.doneness = "Özel"; onApply() }) {
                     Text("Tamam").font(.system(size: 15, weight: .light)).foregroundColor(.white)
                         .frame(maxWidth: .infinity).padding(.vertical, 10).background(t.maroon)
                 }.buttonStyle(.plain)
@@ -362,6 +370,7 @@ struct CustomView: View {
 // MARK: - 06 Water (tap water row to toggle full/low)
 struct WaterView: View {
     @ObservedObject var s: CookSession
+    var onStart: () -> Void
     var body: some View {
         let t = s.theme
         VStack(spacing: 8) {
@@ -394,7 +403,7 @@ struct WaterView: View {
         .padding(.horizontal, 12)
         .fitScreen()
     }
-    private func start() { if s.lowWater { s.showWaterWarn = true } else { s.startCook() } }
+    private func start() { if s.lowWater { s.showWaterWarn = true } else { s.startCook(); onStart() } }
 }
 
 // MARK: - 07 Countdown
@@ -469,7 +478,7 @@ struct ProfileView: View {
     }
 }
 
-// MARK: - Popups (rendered at root → always full-screen + centered)
+// MARK: - Popups
 struct WaterWarnOverlay: View {
     @ObservedObject var s: CookSession
     var onOK: () -> Void
