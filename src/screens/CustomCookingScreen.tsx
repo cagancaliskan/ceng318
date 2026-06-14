@@ -49,6 +49,15 @@ function Wheel({ value, count, onChange }: { value: number; count: number; onCha
     if (Platform.OS === 'web') ref.current?.scrollTo({ y: idx * ITEM, animated: true });
   };
 
+  // Tap a number to center it. On web a div can't be drag-scrolled with a mouse, so
+  // tapping is the reliable way to pick a value there; touch drag still works on phones.
+  const commitTo = (i: number) => {
+    const idx = Math.max(0, Math.min(count - 1, i));
+    last.current = idx;
+    onChange(idx);
+    ref.current?.scrollTo({ y: idx * ITEM, animated: true });
+  };
+
   return (
     <View style={{ height: ITEM * VISIBLE, width: ds(74), overflow: 'hidden' }}>
       <Animated.ScrollView
@@ -79,9 +88,11 @@ function Wheel({ value, count, onChange }: { value: number; count: number; onCha
           const opacity = scrollY.interpolate({ inputRange, outputRange: [0.26, 1, 0.26], extrapolate: 'clamp' });
           const scale = scrollY.interpolate({ inputRange, outputRange: [0.6, 1, 0.6], extrapolate: 'clamp' });
           return (
-            <Animated.View key={i} style={{ height: ITEM, alignItems: 'center', justifyContent: 'center', opacity, transform: [{ scale }] }}>
-              <Txt size={40} weight={300} color={C.bordo}>{f2(i)}</Txt>
-            </Animated.View>
+            <Pressable key={i} onPress={() => commitTo(i)}>
+              <Animated.View style={{ height: ITEM, alignItems: 'center', justifyContent: 'center', opacity, transform: [{ scale }] }}>
+                <Txt size={40} weight={300} color={C.bordo}>{f2(i)}</Txt>
+              </Animated.View>
+            </Pressable>
           );
         })}
       </Animated.ScrollView>

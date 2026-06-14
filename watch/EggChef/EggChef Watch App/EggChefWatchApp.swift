@@ -45,7 +45,8 @@ struct Theme {
 
 // MARK: - Session
 final class CookSession: ObservableObject {
-    @Published var count = 3
+    @Published var selected: [Bool] = [true, true, true, false, false, false]
+    var count: Int { selected.filter { $0 }.count }
     @Published var doneness = "Rafadan"
     @Published var customMin = 3
     @Published var customSec = 52
@@ -59,13 +60,13 @@ final class CookSession: ObservableObject {
     @Published var showWaterWarn = false
     @Published var showDone = false
 
-    let durations: [String: Int] = ["Rafadan": 300, "Kayısı": 480, "Katı": 600]
+    let durations: [String: Int] = ["Rafadan": 360, "Kayısı": 480, "Katı": 600]
     var theme: Theme { Theme(dark: dark) }
 
     func donenessTotal() -> Int { doneness == "Özel" ? customMin * 60 + customSec : (durations[doneness] ?? 300) }
     func customLabel() -> String { String(format: "%02d:%02d", customMin, customSec) }
     func startCook() { total = Double(donenessTotal()); remaining = total; paused = false }
-    func cycleCount() { count = count >= 6 ? 1 : count + 1 }
+    func toggle(_ i: Int) { var n = selected; n[i].toggle(); if n.contains(true) { selected = n } }   // per-egg on/off, keep ≥1
 }
 
 enum Screen { case main, count, doneness, custom, water, countdown, profile }
@@ -284,16 +285,18 @@ struct EggDial: View {
             Circle().fill(t.plate).frame(width: 130, height: 130).shadow(color: .black.opacity(0.12), radius: 9, y: 5)
             ForEach(0..<6, id: \.self) { i in
                 let ang = (Double(i) * 60.0 - 60.0) * .pi / 180.0
-                DialEgg(selected: i < s.count, t: t).offset(x: R * CGFloat(cos(ang)), y: R * CGFloat(sin(ang)))
+                DialEgg(selected: s.selected[i], t: t)
+                    .offset(x: R * CGFloat(cos(ang)), y: R * CGFloat(sin(ang)))
+                    .contentShape(Rectangle())
+                    .onTapGesture { s.toggle(i) }   // toggle just this egg on/off (like the phone app)
             }
             VStack(spacing: -2) {
                 Text("\(s.count)").font(.system(size: 40, weight: .light)).foregroundColor(t.bordo)
                 Text("adet").font(.system(size: 14, weight: .light)).foregroundColor(t.gray)
             }
+            .allowsHitTesting(false)
         }
         .frame(width: 144, height: 144)
-        .contentShape(Rectangle())
-        .onTapGesture { s.cycleCount() }
     }
 }
 
@@ -311,11 +314,11 @@ struct DonenessView: View {
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
                         cell(label: "Rafadan") { AnyView(RafadanIcon(c: t.gray)) } tap: { s.doneness = "Rafadan"; onWater() }
-                        cell(label: "Kayısı") { AnyView(KayisiIcon(c: t.gray)) } tap: { s.doneness = "Kayısı"; onWater() }
+                        cell(label: "Kayısı") { AnyView(KatiIcon(c: t.gray)) } tap: { s.doneness = "Kayısı"; onWater() }
                     }
                     HStack(spacing: 0) {
-                        cell(label: "Katı") { AnyView(KatiIcon(c: t.gray)) } tap: { s.doneness = "Katı"; onWater() }
-                        cell(label: "Özel") { AnyView(Text(s.customLabel()).font(.system(size: 26, weight: .light)).foregroundColor(t.bordo)) } tap: { onCustom() }
+                        cell(label: "Katı") { AnyView(KayisiIcon(c: t.gray)) } tap: { s.doneness = "Katı"; onWater() }
+                        cell(label: "Özel") { AnyView(Image(systemName: "line.3.horizontal").font(.system(size: 26, weight: .regular)).foregroundColor(t.gray)) } tap: { onCustom() }
                     }
                 }
                 Rectangle().fill(t.line).frame(width: 1).padding(.vertical, 10)
@@ -381,7 +384,7 @@ struct WaterView: View {
                     VStack(alignment: .leading, spacing: 1) {
                         Text("Haznedeki Su\nMiktarı").font(.system(size: 12, weight: .light)).foregroundColor(t.gray)
                         HStack(spacing: 5) {
-                            Text(s.lowWater ? "~5 ml" : "~65 ml").font(.system(size: 15)).foregroundColor(s.lowWater ? t.red : t.teal)
+                            Text(s.lowWater ? "~5 ml" : "Otomatik çekilecek").font(.system(size: s.lowWater ? 15 : 13)).foregroundColor(s.lowWater ? t.red : t.teal)
                             if s.lowWater { Image(systemName: "exclamationmark.circle").font(.system(size: 12)).foregroundColor(t.red) }
                         }
                     }

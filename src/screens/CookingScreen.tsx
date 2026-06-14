@@ -155,7 +155,9 @@ export function CookingScreen() {
               </SvgLinear>
             </Defs>
             <Circle cx={cx} cy={cy} r={Rr} fill="none" stroke="rgba(90,21,32,0.08)" strokeWidth={ds(12)} />
-            {progress > 0 && <Path d={dPath} fill="none" stroke="url(#cook)" strokeWidth={ds(12)} strokeLinecap="round" />}
+            {/* solid bordo — RN-SVG gradient url(#…) strokes don't render on web, which
+                left the progress arc invisible there (the timer ticked but nothing filled) */}
+            {progress > 0 && <Path d={dPath} fill="none" stroke={C.bordo} strokeWidth={ds(12)} strokeLinecap="round" />}
           </Svg>
 
           {/* 3 stage bubbles sitting on the ring */}
