@@ -1,0 +1,667 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		243C2A092FDECB3D0024363F /* EggChef Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 243C2A082FDECB3D0024363F /* EggChef Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		243C2A0A2FDECB3D0024363F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 243C29FC2FDECB3C0024363F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 243C2A072FDECB3D0024363F;
+			remoteInfo = "EggChef Watch App";
+		};
+		243C2A182FDECB400024363F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 243C29FC2FDECB3C0024363F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 243C2A072FDECB3D0024363F;
+			remoteInfo = "EggChef Watch App";
+		};
+		243C2A222FDECB400024363F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 243C29FC2FDECB3C0024363F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 243C2A072FDECB3D0024363F;
+			remoteInfo = "EggChef Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		243C2A2E2FDECB400024363F /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				243C2A092FDECB3D0024363F /* EggChef Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		243C2A022FDECB3D0024363F /* EggChef.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EggChef.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		243C2A082FDECB3D0024363F /* EggChef Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EggChef Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		243C2A172FDECB400024363F /* EggChef Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EggChef Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		243C2A212FDECB400024363F /* EggChef Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EggChef Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		243C2A0C2FDECB3D0024363F /* EggChef Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "EggChef Watch App";
+			sourceTree = "<group>";
+		};
+		243C2A1A2FDECB400024363F /* EggChef Watch AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "EggChef Watch AppTests";
+			sourceTree = "<group>";
+		};
+		243C2A242FDECB400024363F /* EggChef Watch AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "EggChef Watch AppUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		243C2A052FDECB3D0024363F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		243C2A142FDECB400024363F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		243C2A1E2FDECB400024363F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		243C29FB2FDECB3C0024363F = {
+			isa = PBXGroup;
+			children = (
+				243C2A0C2FDECB3D0024363F /* EggChef Watch App */,
+				243C2A1A2FDECB400024363F /* EggChef Watch AppTests */,
+				243C2A242FDECB400024363F /* EggChef Watch AppUITests */,
+				243C2A032FDECB3D0024363F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		243C2A032FDECB3D0024363F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				243C2A022FDECB3D0024363F /* EggChef.app */,
+				243C2A082FDECB3D0024363F /* EggChef Watch App.app */,
+				243C2A172FDECB400024363F /* EggChef Watch AppTests.xctest */,
+				243C2A212FDECB400024363F /* EggChef Watch AppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		243C2A012FDECB3D0024363F /* EggChef */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 243C2A2F2FDECB400024363F /* Build configuration list for PBXNativeTarget "EggChef" */;
+			buildPhases = (
+				243C2A002FDECB3D0024363F /* Resources */,
+				243C2A2E2FDECB400024363F /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				243C2A0B2FDECB3D0024363F /* PBXTargetDependency */,
+			);
+			name = EggChef;
+			packageProductDependencies = (
+			);
+			productName = EggChef;
+			productReference = 243C2A022FDECB3D0024363F /* EggChef.app */;
+			productType = "com.apple.product-type.application.watchapp2-container";
+		};
+		243C2A072FDECB3D0024363F /* EggChef Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 243C2A2B2FDECB400024363F /* Build configuration list for PBXNativeTarget "EggChef Watch App" */;
+			buildPhases = (
+				243C2A042FDECB3D0024363F /* Sources */,
+				243C2A052FDECB3D0024363F /* Frameworks */,
+				243C2A062FDECB3D0024363F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				243C2A0C2FDECB3D0024363F /* EggChef Watch App */,
+			);
+			name = "EggChef Watch App";
+			packageProductDependencies = (
+			);
+			productName = "EggChef Watch App";
+			productReference = 243C2A082FDECB3D0024363F /* EggChef Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		243C2A162FDECB400024363F /* EggChef Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 243C2A322FDECB400024363F /* Build configuration list for PBXNativeTarget "EggChef Watch AppTests" */;
+			buildPhases = (
+				243C2A132FDECB400024363F /* Sources */,
+				243C2A142FDECB400024363F /* Frameworks */,
+				243C2A152FDECB400024363F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				243C2A192FDECB400024363F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				243C2A1A2FDECB400024363F /* EggChef Watch AppTests */,
+			);
+			name = "EggChef Watch AppTests";
+			packageProductDependencies = (
+			);
+			productName = "EggChef Watch AppTests";
+			productReference = 243C2A172FDECB400024363F /* EggChef Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		243C2A202FDECB400024363F /* EggChef Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 243C2A352FDECB400024363F /* Build configuration list for PBXNativeTarget "EggChef Watch AppUITests" */;
+			buildPhases = (
+				243C2A1D2FDECB400024363F /* Sources */,
+				243C2A1E2FDECB400024363F /* Frameworks */,
+				243C2A1F2FDECB400024363F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				243C2A232FDECB400024363F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				243C2A242FDECB400024363F /* EggChef Watch AppUITests */,
+			);
+			name = "EggChef Watch AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "EggChef Watch AppUITests";
+			productReference = 243C2A212FDECB400024363F /* EggChef Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		243C29FC2FDECB3C0024363F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					243C2A012FDECB3D0024363F = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					243C2A072FDECB3D0024363F = {
+						CreatedOnToolsVersion = 16.4;
+						LastSwiftMigration = 1640;
+					};
+					243C2A162FDECB400024363F = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 243C2A072FDECB3D0024363F;
+					};
+					243C2A202FDECB400024363F = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 243C2A072FDECB3D0024363F;
+					};
+				};
+			};
+			buildConfigurationList = 243C29FF2FDECB3C0024363F /* Build configuration list for PBXProject "EggChef" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 243C29FB2FDECB3C0024363F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 243C2A032FDECB3D0024363F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				243C2A012FDECB3D0024363F /* EggChef */,
+				243C2A072FDECB3D0024363F /* EggChef Watch App */,
+				243C2A162FDECB400024363F /* EggChef Watch AppTests */,
+				243C2A202FDECB400024363F /* EggChef Watch AppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		243C2A002FDECB3D0024363F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		243C2A062FDECB3D0024363F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		243C2A152FDECB400024363F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		243C2A1F2FDECB400024363F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		243C2A042FDECB3D0024363F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		243C2A132FDECB400024363F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		243C2A1D2FDECB400024363F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		243C2A0B2FDECB3D0024363F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 243C2A072FDECB3D0024363F /* EggChef Watch App */;
+			targetProxy = 243C2A0A2FDECB3D0024363F /* PBXContainerItemProxy */;
+		};
+		243C2A192FDECB400024363F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 243C2A072FDECB3D0024363F /* EggChef Watch App */;
+			targetProxy = 243C2A182FDECB400024363F /* PBXContainerItemProxy */;
+		};
+		243C2A232FDECB400024363F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 243C2A072FDECB3D0024363F /* EggChef Watch App */;
+			targetProxy = 243C2A222FDECB400024363F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		243C2A292FDECB400024363F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		243C2A2A2FDECB400024363F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		243C2A2C2FDECB400024363F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = EggChef;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cagancaliskan.EggChef.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "EggChef Watch App/EggChef Watch App-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		243C2A2D2FDECB400024363F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = EggChef;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cagancaliskan.EggChef.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "EggChef Watch App/EggChef Watch App-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
+		243C2A302FDECB400024363F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_KEY_CFBundleDisplayName = EggChef;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cagancaliskan.EggChef;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		243C2A312FDECB400024363F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_KEY_CFBundleDisplayName = EggChef;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cagancaliskan.EggChef;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		243C2A332FDECB400024363F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cagancaliskan.EggChef-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EggChef Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EggChef Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		243C2A342FDECB400024363F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cagancaliskan.EggChef-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EggChef Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EggChef Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
+		243C2A362FDECB400024363F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cagancaliskan.EggChef-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "EggChef Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		243C2A372FDECB400024363F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cagancaliskan.EggChef-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "EggChef Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		243C29FF2FDECB3C0024363F /* Build configuration list for PBXProject "EggChef" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				243C2A292FDECB400024363F /* Debug */,
+				243C2A2A2FDECB400024363F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		243C2A2B2FDECB400024363F /* Build configuration list for PBXNativeTarget "EggChef Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				243C2A2C2FDECB400024363F /* Debug */,
+				243C2A2D2FDECB400024363F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		243C2A2F2FDECB400024363F /* Build configuration list for PBXNativeTarget "EggChef" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				243C2A302FDECB400024363F /* Debug */,
+				243C2A312FDECB400024363F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		243C2A322FDECB400024363F /* Build configuration list for PBXNativeTarget "EggChef Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				243C2A332FDECB400024363F /* Debug */,
+				243C2A342FDECB400024363F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		243C2A352FDECB400024363F /* Build configuration list for PBXNativeTarget "EggChef Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				243C2A362FDECB400024363F /* Debug */,
+				243C2A372FDECB400024363F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 243C29FC2FDECB3C0024363F /* Project object */;
+}

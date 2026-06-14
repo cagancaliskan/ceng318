@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>EggChef — Apple Watch Demo</title>
+<style>
+  :root{
+    --maroon:#8a2433; --maroon-d:#7a1c28; --bordo:#8a2030; --red:#c43329;
+    --blue:#2f7fd0; --teal:#5f93a6;
+    --screen:#ffffff; --surface:#ffffff; --dial:#fdfdfd;
+    --egg:#d6d6d6; --ink:#333333; --gray:#9a9a9a; --gray-d:#6f6f6f;
+    --line:#e8e8e8; --card:#dcdcdc; --track:#ededed;
+    --picksel:#3d3d3d; --pickdim:#d0d0d0;
+    --font:'Helvetica Neue',Helvetica,'Segoe UI',Arial,sans-serif;
+  }
+  /* ---- DARK MODE (toggled via the Profile switch) ---- */
+  .ec-screen.dark{
+    --bordo:#d2554d; --red:#e2645c; --blue:#4f9ce4; --teal:#82b5c8;
+    --screen:#0f0f11; --surface:#1c1c20; --dial:#1b1b1f;
+    --egg:#3b3b42; --ink:#f0f0f0; --gray:#8a8a90; --gray-d:#b6b6bc;
+    --line:#33333b; --card:#2a2a30; --track:#2d2d33;
+    --picksel:#ececec; --pickdim:#4c4c54;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:var(--font);background:transparent;display:flex;align-items:center;justify-content:center;}
+  .ec-stage{display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px;}
+
+  /* watch hardware */
+  .ec-watch{position:relative;width:248px;height:300px;}
+  .ec-case{position:absolute;inset:0;border-radius:60px;background:linear-gradient(150deg,#3a3a3d,#101012 60%,#000);
+    box-shadow:0 18px 40px -12px rgba(0,0,0,.55), inset 0 1px 2px rgba(255,255,255,.18);}
+  .ec-crown{position:absolute;right:-6px;top:96px;width:9px;height:38px;border-radius:5px;
+    background:linear-gradient(90deg,#5a5a5e,#222);box-shadow:0 2px 4px rgba(0,0,0,.5);cursor:pointer;}
+  .ec-crown:active{transform:translateX(1px);}
+  .ec-side{position:absolute;right:-4px;top:152px;width:6px;height:52px;border-radius:4px;background:#1a1a1c;}
+  .ec-screen{position:absolute;inset:11px;border-radius:50px;overflow:hidden;background:var(--screen);transition:background .25s;}
+
+  /* external demo control */
+  .demo-ctrl{display:flex;align-items:center;gap:8px;font-family:var(--font);font-size:13px;color:#444;
+    background:#f3f3f4;border:1px solid #e2e2e3;border-radius:20px;padding:7px 14px;user-select:none;}
+  .demo-ctrl input{width:15px;height:15px;accent-color:#8a2433;cursor:pointer;}
+  .demo-ctrl label{display:flex;align-items:center;gap:8px;cursor:pointer;}
+
+  /* screens */
+  .scr{position:absolute;inset:0;display:none;flex-direction:column;background:var(--screen);}
+  .scr.on{display:flex;animation:fade .22s ease both;}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .tap{cursor:pointer;}
+  .scrollbar{position:absolute;right:5px;top:96px;width:3px;height:64px;border-radius:2px;background:var(--pickdim);}
+
+  /* splash (always branded) */
+  .splash{align-items:center;justify-content:center;background:linear-gradient(158deg,#6c1626 0%,#9c2236 50%,#591320 100%);cursor:pointer;}
+  .splash .mark{position:relative;width:100%;height:132px;}
+  .splash .eg-ghost{position:absolute;top:6px;left:0;right:0;text-align:center;font-size:60px;font-weight:300;letter-spacing:.5px;
+    color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.55);
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.5) 0 1.5px,transparent 1.5px 5px);-webkit-background-clip:text;background-clip:text;}
+  .splash .eg-solid{position:absolute;top:46px;left:0;right:0;text-align:center;font-size:47px;font-weight:300;letter-spacing:.5px;color:#fff;}
+  .splash .vestel{position:absolute;bottom:24px;left:0;right:0;text-align:center;color:#fff;font-weight:800;font-size:21px;letter-spacing:3px;}
+
+  /* main */
+  .main{padding:16px 16px;}
+  .main .head{display:flex;justify-content:space-between;align-items:center;color:var(--gray);font-size:17px;font-weight:300;margin:8px 6px 14px;}
+  .btn-big{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:58px;border-radius:30px;
+    background:var(--maroon);color:#fff;font-size:18px;font-weight:300;margin-top:14px;box-shadow:0 8px 16px -6px rgba(90,18,30,.55);}
+  .btn-big:active{background:var(--maroon-d);transform:translateY(1px);}
+  .btn-big svg{width:22px;height:22px;}
+
+  /* count */
+  .count{align-items:center;justify-content:center;gap:4px;padding:10px;}
+  .dial{position:relative;width:208px;height:208px;border-radius:50%;background:var(--dial);
+    box-shadow:0 12px 30px -14px rgba(90,21,32,.18), inset 0 0 0 1px rgba(0,0,0,.03);cursor:pointer;flex:none;}
+  .egg{position:absolute;width:40px;height:53px;}
+  .egg svg{width:100%;height:100%;filter:drop-shadow(0 5px 6px rgba(40,30,33,.22));}
+  .dial .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .dial .num{color:var(--bordo);font-size:56px;font-weight:300;line-height:1;}
+  .dial .adet{color:var(--gray);font-size:17px;font-weight:300;margin-top:-2px;}
+  .devam{background:var(--maroon);color:#fff;font-size:15px;font-weight:300;padding:9px 26px;border-radius:20px;box-shadow:0 6px 13px -5px rgba(90,18,30,.5);}
+  .devam:active{background:var(--maroon-d);}
+
+  /* doneness */
+  .kvam{padding:14px 0 4px;}
+  .kvam .title{text-align:center;color:var(--gray-d);font-size:19px;font-weight:300;margin-bottom:6px;}
+  .grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;position:relative;}
+  .grid .vline{position:absolute;left:50%;top:14%;bottom:14%;width:1px;background:var(--line);}
+  .grid .hline{position:absolute;top:50%;left:12%;right:12%;height:1px;background:var(--line);}
+  .cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--gray-d);font-size:15px;font-weight:300;cursor:pointer;}
+  .cell svg{width:30px;height:30px;}
+  .cell:active{opacity:.55;}
+  .cell .time{color:var(--red);font-size:20px;font-weight:300;letter-spacing:1px;}
+
+  /* custom picker (draggable) */
+  .ozel{align-items:center;justify-content:center;padding:14px;}
+  .pcard{width:188px;background:var(--surface);border-radius:26px;overflow:hidden;box-shadow:0 16px 36px -14px rgba(40,10,16,.4);}
+  .pwheels{display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 6px 4px;}
+  .wheel{width:62px;height:120px;overflow:hidden;position:relative;touch-action:none;cursor:grab;}
+  .wheel:active{cursor:grabbing;}
+  .wtrack{will-change:transform;}
+  .wrow{text-align:center;font-weight:300;}
+  .wrow.wsel{color:var(--picksel);font-size:33px;}
+  .wrow.wdim{color:var(--pickdim);font-size:23px;}
+  .pcolon{font-size:30px;color:var(--gray);font-weight:300;align-self:center;}
+  .tamam{background:var(--maroon);color:#fff;text-align:center;padding:11px;font-size:16px;font-weight:300;cursor:pointer;}
+  .tamam:active{background:var(--maroon-d);}
+
+  /* water */
+  .water{padding:16px;}
+  .winfo{display:flex;gap:11px;align-items:flex-start;}
+  .winfo svg{flex:none;margin-top:1px;}
+  .winfo .lab{color:var(--gray);font-size:15px;font-weight:300;line-height:1.15;}
+  .winfo .val{font-size:18px;font-weight:400;display:flex;align-items:center;gap:6px;margin-top:3px;}
+  .wdiv{height:1px;background:var(--line);margin:13px 2px;}
+  .badge{width:18px;height:18px;border-radius:50%;border:2px solid var(--red);color:var(--red);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;}
+  .basla{margin-top:auto;}
+
+  /* popups */
+  .overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:flex-start;
+    padding-top:46px;background:rgba(10,4,6,.42);z-index:6;}
+  .overlay.show{display:flex;animation:fade .2s both;}
+  .popcard{position:relative;width:188px;background:var(--surface);border-radius:24px;box-shadow:0 24px 48px -16px rgba(0,0,0,.55);}
+  .pophalo{position:absolute;top:-28px;left:50%;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;background:var(--surface);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px -5px rgba(0,0,0,.3), 0 0 0 6px var(--surface);}
+  .pophalo svg{width:28px;height:28px;}
+  .popbody{padding:38px 16px 14px;text-align:center;color:var(--gray-d);font-size:16px;font-weight:300;line-height:1.3;}
+  .popok{background:var(--maroon);color:#fff;text-align:center;padding:11px;font-size:16px;font-weight:300;cursor:pointer;border-radius:0 0 24px 24px;}
+  .popok:active{background:var(--maroon-d);}
+
+  /* countdown */
+  .geri{align-items:center;justify-content:center;}
+  .ring{position:relative;width:230px;height:230px;}
+  .ring > svg{transform:rotate(90deg);}
+  .ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring .t{color:var(--bordo);font-size:54px;font-weight:300;letter-spacing:1px;line-height:1;}
+  .ring .kaldi{color:var(--bordo);font-size:19px;font-weight:300;margin-top:2px;}
+  .pause{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:36px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+  /* profile */
+  .profil{padding:14px 16px;}
+  .profil .x{align-self:flex-end;color:var(--gray);cursor:pointer;font-size:20px;}
+  .profil .top{display:flex;align-items:center;gap:12px;margin:4px 0 14px;}
+  .avatar{width:74px;height:74px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--gray-d);font-size:15px;font-weight:300;flex:none;}
+  .profil .name{font-size:21px;font-weight:300;color:var(--ink);}
+  .profil .mail{font-size:12px;color:var(--gray);}
+  .pcards{display:flex;gap:10px;}
+  .pcards .c{flex:1;background:var(--card);border-radius:16px;padding:11px 12px;}
+  .pcards .lab{color:var(--gray-d);font-size:13px;font-weight:300;}
+  .pcards .v{margin-top:6px;font-size:14px;color:var(--ink);display:flex;align-items:center;gap:5px;}
+  .toggle{margin-top:8px;width:40px;height:22px;border-radius:12px;background:#bdbdbd;position:relative;cursor:pointer;transition:background .2s;}
+  .toggle b{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:left .2s;}
+  .toggle.on{background:var(--maroon);}
+  .toggle.on b{left:20px;}
+  .devid{text-align:center;color:var(--gray);font-size:13px;font-weight:300;margin-top:auto;padding-top:12px;}
+</style>
+</head>
+<body>
+<div class="ec-stage">
+  <div class="ec-watch">
+    <div class="ec-case"></div>
+    <div class="ec-crown" id="crown" title="Crown — yukarı: geri, aşağı: ileri (tık: geri)"></div>
+    <div class="ec-side"></div>
+    <div class="ec-screen" id="screen">
+
+      <section class="scr splash" data-scr="splash" data-act="toMain">
+        <div class="mark">
+          <div class="eg-ghost">EggChef</div>
+          <div class="eg-solid">EggChef</div>
+        </div>
+        <div class="vestel">VESTEL</div>
+      </section>
+
+      <section class="scr main" data-scr="main">
+        <div class="head"><span>EggChef</span><span class="tap" data-act="closeMain">✕</span></div>
+        <div class="btn-big tap" data-act="new">Yeni Pişirme
+          <svg viewBox="0 0 40 52" fill="#fff"><path d="M20 3C29 3 35 21 35 33C35 43 28 49 20 49C12 49 5 43 5 33C5 21 11 3 20 3Z"/></svg>
+        </div>
+        <div class="btn-big tap" data-act="profil">Profil ve Ayarlar
+          <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 8a4 4 0 100 8 4 4 0 000-8zm9 4l-2 1.5.3 2.4-2.3.8-1.2 2.1-2.4-.5L12 22l-1.4-1.4-2.4.5-1.2-2.1-2.3-.8.3-2.4L3 12l2-1.5-.3-2.4 2.3-.8L8.2 5.2l2.4.5L12 2l1.4 1.7 2.4-.5 1.2 2.1 2.3.8-.3 2.4L21 12z"/></svg>
+        </div>
+      </section>
+
+      <section class="scr count" data-scr="count">
+        <div class="scrollbar"></div>
+        <div class="dial" id="dial"></div>
+        <div class="devam tap" data-act="toKvam">Devam ›</div>
+      </section>
+
+      <section class="scr kvam" data-scr="kvam">
+        <div class="scrollbar"></div>
+        <div class="title">Hızlı Pişirme</div>
+        <div class="grid">
+          <div class="vline"></div><div class="hline"></div>
+          <div class="cell tap" data-act="pickRafadan">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 6c4 0 6.5 2 6.5 4.8 0 1.4 1.7 2 1.7 4.2 0 2.9-2.3 4.6-4.8 4.6-1 0-1.8-.3-2.5-.8-.8.5-1.7.9-2.9.9-2.7 0-4.8-1.8-4.8-4.5 0-1.9 1.2-2.7 1.2-4.4C9.6 8 12 6 16 6Z"/><circle cx="15" cy="14.5" r="3.2"/></svg>
+            Rafadan
+          </div>
+          <div class="cell tap" data-act="pickKayisi">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><circle cx="16" cy="16" r="4.4"/><path d="M16 6.5l1.8 3.2 3.6-.6-.6 3.6L24 16l-3.2 1.8.6 3.6-3.6-.6L16 24l-1.8-3.2-3.6.6.6-3.6L8 16l3.2-1.8-.6-3.6 3.6.6z"/></svg>
+            Kayısı
+          </div>
+          <div class="cell tap" data-act="pickKati">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="16" cy="16" r="9"/><circle cx="16" cy="16" r="3.4"/></svg>
+            Katı
+          </div>
+          <div class="cell tap" data-act="toOzel">
+            <span class="time" id="ozelTime">03:52</span>
+            Özel
+          </div>
+        </div>
+      </section>
+
+      <section class="scr ozel" data-scr="ozel">
+        <div class="pcard">
+          <div class="pwheels">
+            <div class="wheel" id="wMin"></div>
+            <div class="pcolon">:</div>
+            <div class="wheel" id="wSec"></div>
+          </div>
+          <div class="tamam tap" data-act="applyCustom">Tamam</div>
+        </div>
+      </section>
+
+      <section class="scr water" data-scr="water">
+        <div class="scrollbar"></div>
+        <div class="winfo">
+          <svg width="26" height="32" viewBox="0 0 24 30" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5C8 9 5.5 12.5 5.5 16.5a6.5 6.5 0 0013 0C18.5 12.5 16 9 12 3.5Z"/></svg>
+          <div><div class="lab">Haznedeki Su<br>Miktarı</div><div class="val" id="waterVal"></div></div>
+        </div>
+        <div class="wdiv"></div>
+        <div class="winfo">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--gray-d)" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3 2"/></svg>
+          <div><div class="lab">Tahmini Pişirme<br>Süresi</div><div class="val" id="estVal" style="color:var(--teal)"></div></div>
+        </div>
+        <div class="btn-big basla tap" data-act="cook">Başlat</div>
+      </section>
+
+      <section class="scr geri" data-scr="geri">
+        <div class="scrollbar"></div>
+        <div class="ring">
+          <svg width="230" height="230" viewBox="0 0 230 230">
+            <circle cx="115" cy="115" r="104" fill="none" stroke="var(--track)" stroke-width="10"/>
+            <circle id="arc" cx="115" cy="115" r="104" fill="none" stroke="var(--bordo)" stroke-width="10" stroke-linecap="round" stroke-dasharray="653" stroke-dashoffset="653"/>
+          </svg>
+          <div class="mid"><div class="t" id="cdTime">05:00</div><div class="kaldi">kaldı</div></div>
+          <div class="pause tap" id="pauseBtn" data-act="pause"></div>
+        </div>
+      </section>
+
+      <section class="scr profil" data-scr="profil">
+        <div class="x tap" data-act="toMain">✕</div>
+        <div class="top">
+          <div class="avatar">Foto</div>
+          <div><div class="name">Ahmet</div><div class="mail">ahm******@gmail.com</div></div>
+        </div>
+        <div class="pcards">
+          <div class="c"><div class="lab">Dil Seçimi</div><div class="v">🇹🇷 Türkçe (TR)</div></div>
+          <div class="c"><div class="lab">Dark Mode</div><div class="toggle tap" id="darkToggle" data-act="dark"><b></b></div></div>
+        </div>
+        <div class="devid">EggChef/A98S77AFG</div>
+      </section>
+
+      <div class="overlay" id="ov-warn">
+        <div class="popcard">
+          <div class="pophalo" style="box-shadow:0 6px 14px -5px rgba(196,51,41,.4),0 0 0 6px var(--surface),inset 0 0 0 2px rgba(196,51,41,.25)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v8"/><circle cx="12" cy="18" r="1"/></svg>
+          </div>
+          <div class="popbody">Su seviyesi yetersiz!<br>Lütfen su haznesine<br>su ekleyiniz.</div>
+          <div class="popok tap" data-act="refill">Tamam</div>
+        </div>
+      </div>
+      <div class="overlay" id="ov-done">
+        <div class="popcard">
+          <div class="pophalo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--maroon)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l5 5L20 7"/></svg>
+          </div>
+          <div class="popbody" style="font-size:18px;color:var(--ink)">Pişirme bitti!</div>
+          <div class="popok tap" data-act="finish">Tamam</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="demo-ctrl">
+    <label><input type="checkbox" id="waterChk" checked> Makinede yeterli su var</label>
+  </div>
+</div>
+
+<script>
+(function(){
+  var S = {
+    cur:'splash', pop:null, hb:[], hf:[], dark:false,
+    count:3, doneness:'Rafadan', durations:{ 'Rafadan':300, 'Kayısı':480, 'Katı':600 },
+    cMin:3, cSec:52, lowWater:false,
+    total:300, remaining:300, paused:false, raf:null, last:0, DEMO_SECONDS:20
+  };
+  var screen=document.getElementById('screen');
+  function id(x){ return document.getElementById(x); }
+  function f2(n){ return String(((Math.round(n)%60)+60)%60).padStart(2,'0'); }
+  var PAUSE_SVG='<svg width="20" height="22" viewBox="0 0 20 22"><rect x="3" y="2" width="4.5" height="18" rx="2" fill="#9a9a9a"/><rect x="12.5" y="2" width="4.5" height="18" rx="2" fill="#9a9a9a"/></svg>';
+  var PLAY_SVG ='<svg width="20" height="22" viewBox="0 0 22 22"><path d="M5 3l14 8-14 8z" fill="#9a9a9a"/></svg>';
+
+  function render(){
+    screen.querySelectorAll('.scr').forEach(function(s){ s.classList.toggle('on', s.getAttribute('data-scr')===S.cur); });
+    id('ov-warn').classList.toggle('show', S.pop==='warn');
+    id('ov-done').classList.toggle('show', S.pop==='done');
+    if(S.cur==='count') renderDial();
+    if(S.cur==='water') renderWater();
+    if(S.cur==='geri' && !S.pop){ id('pauseBtn').innerHTML=PAUSE_SVG; startCountdown(); } else stopCountdown();
+  }
+
+  function go(name){ if(S.cur) S.hb.push(S.cur); S.hf=[]; S.cur=name; S.pop=null; render(); }
+  function replace(name){ S.cur=name; S.pop=null; S.hb=[]; S.hf=[]; render(); }
+  function openPop(n){ S.pop=n; render(); }
+  function closePop(){ S.pop=null; render(); }
+  function navBack(){ if(S.pop){ closePop(); return; } if(S.hb.length){ S.hf.push(S.cur); S.cur=S.hb.pop(); render(); } }
+  function navFwd(){ if(S.pop){ popPrimary(); return; } if(S.hf.length){ S.hb.push(S.cur); S.cur=S.hf.pop(); render(); } else basePrimary(); }
+  function basePrimary(){
+    switch(S.cur){
+      case 'splash': replace('main'); break;  case 'main': newCook(); break;
+      case 'count': go('kvam'); break;          case 'kvam': go('water'); break;
+      case 'ozel': applyCustom(); break;        case 'water': cook(); break;
+      case 'profil': go('main'); break;
+    }
+  }
+  function popPrimary(){ if(S.pop==='warn') refill(); else if(S.pop==='done') finish(); }
+
+  function newCook(){ S.count=3; go('count'); }
+  function pick(d){ S.doneness=d; go('water'); }
+  function applyCustom(){ S.doneness='Özel'; id('ozelTime').textContent=f2(S.cMin)+':'+f2(S.cSec); go('water'); }
+  function donenessTotal(){ return S.doneness==='Özel' ? (S.cMin*60+S.cSec) : (S.durations[S.doneness]||300); }
+  function cook(){ if(S.lowWater){ openPop('warn'); return; } S.total=donenessTotal(); S.remaining=S.total; S.paused=false; go('geri'); }
+  function refill(){ S.lowWater=false; id('waterChk').checked=true; closePop(); }
+  function finish(){ replace('main'); }
+  function toggleDark(){ S.dark=!S.dark; screen.classList.toggle('dark', S.dark); id('darkToggle').classList.toggle('on', S.dark); }
+
+  function eggSVG(filled){
+    // SELECTED eggs fill with the brand bordo so each one is clearly visible on the
+    // light dial and every tap gives obvious feedback; UNSELECTED eggs are a faint
+    // gray ghost. (Previously selected eggs were white — invisible on the white dial —
+    // which read as "reversed": the gray unselected eggs looked like the chosen ones.)
+    var body  = filled ? 'var(--bordo)' : 'var(--egg)';
+    var smile = filled ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.14)';
+    return '<svg viewBox="0 0 40 53" style="opacity:'+(filled?1:.6)+'"><path d="M20 3C28 3 35 21 35 34C35 44 29 50 20 50C11 50 5 44 5 34C5 21 12 3 20 3Z" fill="'+body+'" stroke="rgba(0,0,0,.06)" stroke-width="1"/>'+
+           '<path d="M13 40c2 2 5 2 7 0" fill="none" stroke="'+smile+'" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  }
+  function renderDial(){
+    var d=id('dial'); if(!d) return;
+    var R=72, cx=104, cy=104, ew=40, eh=53, html='';
+    for(var i=0;i<6;i++){
+      var a=(i*60-60)*Math.PI/180;
+      var x=cx+Math.cos(a)*R-ew/2, y=cy+Math.sin(a)*R-eh/2;
+      html+='<div class="egg" style="left:'+x+'px;top:'+y+'px">'+eggSVG(i<S.count)+'</div>';
+    }
+    html+='<div class="center"><div class="num">'+S.count+'</div><div class="adet">adet</div></div>';
+    d.innerHTML=html;
+  }
+  function cycleCount(){ S.count = S.count>=6 ? 1 : S.count+1; renderDial(); }
+  // One tap = exactly +1 (1→2→…→6→1, one egg at a time). pointerup fires once per tap
+  // on both mouse and touch; the 140ms guard drops any duplicate/synthetic events so a
+  // single tap can never skip numbers (the old 1→4 jump).
+  var lastDialTap = 0;
+  function tapDial(){ var now = Date.now(); if (now - lastDialTap < 140) return; lastDialTap = now; cycleCount(); }
+
+  function renderWater(){
+    var v=id('waterVal');
+    if(S.lowWater){ v.style.color='var(--red)'; v.innerHTML='~5 ml <span class="badge">!</span>'; }
+    else { v.style.color='var(--teal)'; v.innerHTML='~65 ml'; }
+    id('estVal').textContent=Math.max(1,Math.round(donenessTotal()/60))+' dakika';
+  }
+
+  function makeWheel(el, get, set, o){
+    var rowH=o.rowH, dy=0, dragging=false, lastY=0;
+    function norm(v){ return o.wrap ? ((v%o.max)+o.max)%o.max : Math.max(o.min,Math.min(o.max,v)); }
+    function txt(k){ var v=get()+k; if(o.wrap) return f2(((v%o.max)+o.max)%o.max); return (v>=o.min&&v<=o.max)?f2(v):''; }
+    function render(){
+      var rows='';
+      for(var k=-2;k<=2;k++){ rows+='<div class="wrow '+(k===0?'wsel':'wdim')+'" style="height:'+rowH+'px;line-height:'+rowH+'px">'+txt(k)+'</div>'; }
+      el.innerHTML='<div class="wtrack" style="transform:translateY('+(-rowH+dy)+'px)">'+rows+'</div>';
+    }
+    function commit(){ while(dy>=rowH){ set(norm(get()-1)); dy-=rowH; } while(dy<=-rowH){ set(norm(get()+1)); dy+=rowH; } }
+    el.addEventListener('pointerdown', function(e){ dragging=true; lastY=e.clientY; el.setPointerCapture(e.pointerId); e.preventDefault(); });
+    el.addEventListener('pointermove', function(e){ if(!dragging) return; dy += e.clientY-lastY; lastY=e.clientY; commit(); render(); });
+    function end(){ if(!dragging) return; dragging=false; dy=0;
+      var t=el.querySelector('.wtrack'); if(t){ t.style.transition='transform .16s'; t.style.transform='translateY('+(-rowH)+'px)'; setTimeout(render,170); } }
+    el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+    render(); return { render: render };
+  }
+
+  var CIRC=2*Math.PI*104;
+  function paint(){
+    var p=S.total>0?(1-S.remaining/S.total):0;
+    id('arc').setAttribute('stroke-dashoffset', CIRC*(1-p));
+    var r=Math.max(0,Math.ceil(S.remaining));
+    id('cdTime').textContent=f2(Math.floor(r/60))+':'+f2(r%60);
+  }
+  function startCountdown(){
+    stopCountdown(); paint(); S.last=performance.now();
+    function step(now){
+      if(!S.paused){
+        var dt=(now-S.last)/1000, speed=S.total/S.DEMO_SECONDS;
+        S.remaining=Math.max(0,S.remaining-dt*speed); paint();
+        if(S.remaining<=0){ stopCountdown(); setTimeout(function(){ openPop('done'); },250); return; }
+      }
+      S.last=now; S.raf=requestAnimationFrame(step);
+    }
+    S.raf=requestAnimationFrame(step);
+  }
+  function stopCountdown(){ if(S.raf){ cancelAnimationFrame(S.raf); S.raf=null; } }
+  function togglePause(){ S.paused=!S.paused; S.last=performance.now(); id('pauseBtn').innerHTML=S.paused?PLAY_SVG:PAUSE_SVG; }
+
+  var ACT={
+    toMain:function(){go('main');}, closeMain:function(){go('splash');}, new:newCook,
+    profil:function(){go('profil');}, toKvam:function(){go('kvam');}, toOzel:function(){go('ozel');},
+    pickRafadan:function(){pick('Rafadan');}, pickKayisi:function(){pick('Kayısı');}, pickKati:function(){pick('Katı');},
+    applyCustom:applyCustom, cook:cook, refill:refill, finish:finish, pause:togglePause, dark:toggleDark
+  };
+  screen.addEventListener('click', function(e){ var t=e.target.closest('[data-act]'); if(t){ var fn=ACT[t.getAttribute('data-act')]; if(fn) fn(); } });
+  id('dial').addEventListener('pointerup', tapDial);
+  id('waterChk').addEventListener('change', function(e){ S.lowWater=!e.target.checked; if(S.cur==='water') renderWater(); });
+
+  function wheelNav(e){ e.preventDefault(); if(e.deltaY<0) navBack(); else navFwd(); }
+  screen.addEventListener('wheel', wheelNav, {passive:false});
+  id('crown').addEventListener('wheel', wheelNav, {passive:false});
+  id('crown').addEventListener('click', navBack);
+  window.addEventListener('keydown', function(e){
+    if(e.key==='ArrowUp'||e.key==='ArrowLeft') navBack();
+    else if(e.key==='ArrowDown'||e.key==='ArrowRight') navFwd();
+  });
+
+  makeWheel(id('wMin'), function(){return S.cMin;}, function(v){S.cMin=v;}, {min:0,max:30,wrap:false,rowH:40});
+  makeWheel(id('wSec'), function(){return S.cSec;}, function(v){S.cSec=v;}, {min:0,max:60,wrap:true,rowH:40});
+  id('ozelTime').textContent=f2(S.cMin)+':'+f2(S.cSec);
+  render();
+  setTimeout(function(){ if(S.cur==='splash') replace('main'); }, 2200);
+})();
+</script>
+</body>
+</html>

@@ -115,3 +115,7 @@ _screens/
 _chrome-prof*/
 _cp*/
 _*.mjs
+
+# web deploy build artifacts
+/dist/
+/public_out/

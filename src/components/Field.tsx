@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Pressable, KeyboardTypeOptions } from 'react-native';
 import { ds } from '../theme/scale';
-import { hn } from '../theme/fonts';
+import { hn, hnWeight } from '../theme/fonts';
 import { bs } from '../theme/shadow';
 import { useUI } from '../theme/ui';
 import { Eye, EyeOff } from '../icons';
@@ -51,7 +51,7 @@ export function Field({
         autoCorrect={false}
         value={value}
         onChangeText={onChangeText}
-        style={{ flex: 1, fontFamily: hn(400), fontSize: ds(16), color: C.black, padding: 0 }}
+        style={{ flex: 1, fontFamily: hn(400), fontWeight: hnWeight(400), fontSize: ds(16), color: C.black, padding: 0 }}
       />
       {secure && (
         <Pressable onPress={() => setHidden((h) => !h)} hitSlop={10} style={{ paddingLeft: ds(4) }}>

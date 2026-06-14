@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Pressable, Animated, ScrollView } from 'react-native';
+import { View, Pressable, Animated, ScrollView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ds } from '../theme/scale';
@@ -23,6 +23,7 @@ function Wheel({ value, count, onChange }: { value: number; count: number; onCha
   const scrollY = useRef(new Animated.Value(value * ITEM)).current;
   const ref = useRef<any>(null);
   const last = useRef(value);
+  const settleTimer = useRef<any>(null);
 
   useEffect(() => {
     // land on the initial value once laid out
@@ -44,6 +45,8 @@ function Wheel({ value, count, onChange }: { value: number; count: number; onCha
       last.current = idx;
       onChange(idx);
     }
+    // web has no momentum snap — nudge the wheel to the centered row ourselves
+    if (Platform.OS === 'web') ref.current?.scrollTo({ y: idx * ITEM, animated: true });
   };
 
   return (
@@ -54,7 +57,19 @@ function Wheel({ value, count, onChange }: { value: number; count: number; onCha
         snapToInterval={ITEM}
         decelerationRate="fast"
         scrollEventThrottle={16}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+          // native driver isn't supported for scroll on web; using the JS driver
+          // there keeps the fade/scale interpolation working.
+          useNativeDriver: Platform.OS !== 'web',
+          // web: momentum/drag-end events are unreliable, so commit the value once
+          // scrolling has stopped for a moment.
+          listener: (e: any) => {
+            if (Platform.OS !== 'web') return;
+            const y = e.nativeEvent.contentOffset.y;
+            if (settleTimer.current) clearTimeout(settleTimer.current);
+            settleTimer.current = setTimeout(() => settle(y), 120);
+          },
+        })}
         onMomentumScrollEnd={(e) => settle(e.nativeEvent.contentOffset.y)}
         onScrollEndDrag={(e) => settle(e.nativeEvent.contentOffset.y)}
         contentContainerStyle={{ paddingVertical: ITEM }} // pad so first/last can center

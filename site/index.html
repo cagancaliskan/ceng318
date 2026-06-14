@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EggChef — Canlı Demo</title>
+<meta name="description" content="EggChef akıllı yumurta pişirici — telefon ve Apple Watch uygulamalarının canlı demosu." />
+<link rel="icon" href="/favicon.png" />
+<style>
+  :root{
+    --bordo:#5a1520; --bordo-mid:#8a2032; --bordo-bright:#ad283e;
+    --bg:#faf9f9; --ink:#1c1517; --gray:#6f6a6b; --line:#ece8e9;
+    --font:'Helvetica Neue',Helvetica,'Segoe UI',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ---- hero ---- */
+  .hero{
+    background:linear-gradient(158deg,#6c1626 0%,#9c2236 52%,#591320 100%);
+    color:#fff;text-align:center;padding:54px 20px 64px;position:relative;overflow:hidden;
+  }
+  .hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:48px;background:var(--bg);
+    border-radius:50% 50% 0 0/100% 100% 0 0;}
+  .chips{display:flex;gap:8px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+  .chip{font-size:12px;font-weight:500;letter-spacing:.4px;padding:5px 12px;border-radius:20px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;}
+  .wordmark{font-size:54px;font-weight:300;letter-spacing:.5px;line-height:1;}
+  .wordmark b{font-weight:600;}
+  .tag{margin-top:14px;font-size:17px;font-weight:300;color:rgba(255,255,255,.9);}
+  .sub{margin-top:6px;font-size:14px;font-weight:300;color:rgba(255,255,255,.7);max-width:520px;margin-left:auto;margin-right:auto;}
+
+  /* ---- devices ---- */
+  .stage{max-width:1040px;margin:0 auto;padding:18px 20px 10px;
+    display:flex;gap:48px;justify-content:center;align-items:flex-end;flex-wrap:wrap;}
+  .device{display:flex;flex-direction:column;align-items:center;gap:18px;}
+  .cap{text-align:center;}
+  .cap .name{font-size:19px;font-weight:500;color:var(--bordo-mid);}
+  .cap .meta{font-size:13px;font-weight:300;color:var(--gray);margin-top:2px;}
+  .open{display:inline-block;margin-top:10px;font-size:13px;font-weight:500;color:var(--bordo-bright);
+    border:1px solid #e7cdd3;border-radius:18px;padding:6px 15px;transition:.15s;}
+  .open:hover{background:#fff;border-color:var(--bordo-bright);}
+
+  /* iPhone frame (402×874 design device aspect) */
+  .phone{position:relative;width:412px;height:865px;background:#0b0b0d;border-radius:54px;padding:13px;
+    box-shadow:0 30px 60px -24px rgba(40,10,16,.5), inset 0 0 0 2px #2a2a2e;}
+  .phone .screen{width:100%;height:100%;border-radius:42px;overflow:hidden;background:var(--bg);position:relative;}
+  .phone iframe{width:100%;height:100%;border:0;display:block;}
+  .phone .island{position:absolute;top:22px;left:50%;transform:translateX(-50%);width:112px;height:30px;
+    border-radius:16px;background:#000;z-index:5;}
+
+  /* watch wrapper (the demo brings its own hardware bezel) */
+  .watch{width:300px;height:430px;display:flex;align-items:center;justify-content:center;}
+  .watch iframe{width:300px;height:430px;border:0;display:block;}
+
+  .hint{font-size:12px;color:var(--gray);text-align:center;margin:6px auto 0;}
+
+  /* ---- footer ---- */
+  footer{text-align:center;color:var(--gray);font-size:13px;font-weight:300;padding:34px 20px 40px;border-top:1px solid var(--line);margin-top:24px;}
+  footer a{color:var(--bordo-mid);font-weight:500;}
+
+  /* ---- responsive ---- */
+  @media (max-width:900px){
+    .stage{gap:32px;}
+    .phone{transform:scale(.84);transform-origin:top center;margin-bottom:-138px;}
+  }
+  @media (max-width:480px){
+    .wordmark{font-size:42px;}
+    .phone{transform:scale(.72);margin-bottom:-242px;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="chips">
+      <span class="chip">VESTEL</span>
+      <span class="chip">CENG318 · HCI</span>
+    </div>
+    <div class="wordmark">Egg<b>Chef</b></div>
+    <div class="tag">Akıllı Yumurta Pişirici</div>
+    <div class="sub">Telefon ve Apple Watch arayüzlerini aşağıdan canlı deneyebilirsiniz — dokunarak gezinin.</div>
+  </header>
+
+  <main class="stage">
+    <section class="device">
+      <div class="phone">
+        <div class="screen">
+          <iframe src="/app/" title="EggChef telefon uygulaması" loading="lazy"></iframe>
+        </div>
+        <div class="island"></div>
+      </div>
+      <div class="cap">
+        <div class="name">Telefon Uygulaması</div>
+        <div class="meta">iOS · React Native (Expo)</div>
+        <a class="open" href="/app/" target="_blank" rel="noopener">Tam ekran aç ↗</a>
+      </div>
+    </section>
+
+    <section class="device">
+      <div class="watch">
+        <iframe src="/watch/" title="EggChef Apple Watch demosu" loading="lazy"></iframe>
+      </div>
+      <div class="cap">
+        <div class="name">Apple Watch</div>
+        <div class="meta">watchOS arayüz prototipi</div>
+        <a class="open" href="/watch/" target="_blank" rel="noopener">Tam ekran aç ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <p class="hint">İpucu: saat demosunda sağdaki dijital kurma (crown) ile ileri/geri gezinebilirsiniz.</p>
+
+  <footer>
+    EggChef · CENG318 İnsan-Bilgisayar Etkileşimi projesi · 2026 ·
+    <a href="https://github.com/cagancaliskan/ceng318" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+
+</body>
+</html>
