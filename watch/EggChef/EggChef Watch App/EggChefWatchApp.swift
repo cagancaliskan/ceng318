@@ -2,12 +2,11 @@ import SwiftUI
 
 // ============================================================================
 //  EggChef — native watchOS app (single file, SwiftUI).
-//  Mirrors the EggChef Apple Watch demo flow:
+//  Pixel-matched to the Figma reference screens (watch/figma):
 //    splash → main → egg count → doneness → (custom time) → water → countdown → done
-//    plus a profile screen and water-warning / cooking-done overlays.
+//    plus profile + water-warning / cooking-done popups.
 //  Bordo brand theme, light by default with a working Dark Mode toggle.
-//  Standalone demo (not synced with the phone app). Countdown is demo-accelerated
-//  (~20s) so any duration can be shown live in the simulator.
+//  Standalone demo; countdown is demo-accelerated (~20s).
 // ============================================================================
 
 // MARK: - Color helper
@@ -21,18 +20,21 @@ extension Color {
     }
 }
 
-// MARK: - Theme (light / dark palettes — same bordo brand as the phone app)
+private let popInk = Color(hex: 0x333333)
+
+// MARK: - Theme (light / dark palettes)
 struct Theme {
     var dark: Bool
     var screen: Color { dark ? Color(hex: 0x0f0f11) : .white }
-    var ink: Color { dark ? Color(hex: 0xf0f0f0) : Color(hex: 0x2a2a2a) }
-    var gray: Color { dark ? Color(hex: 0x9a9a9a) : Color(hex: 0x8a8a8a) }
-    var bordo: Color { dark ? Color(hex: 0xd2554d) : Color(hex: 0x5a1520) }
-    var bordoMid: Color { dark ? Color(hex: 0xf1a8b8) : Color(hex: 0x8a2032) }
-    var maroon: Color { Color(hex: 0x8a2433) }
+    var ink: Color { dark ? Color(hex: 0xf0f0f0) : Color(hex: 0x333333) }
+    var gray: Color { dark ? Color(hex: 0x9a9a9a) : Color(hex: 0x9a9a9a) }
+    var bordo: Color { dark ? Color(hex: 0xd2554d) : Color(hex: 0x8a2030) }
+    var maroon: Color { dark ? Color(hex: 0xa6303f) : Color(hex: 0x8a2433) }
     var egg: Color { dark ? Color(hex: 0x3b3b42) : Color(hex: 0xd6d6d6) }
-    var line: Color { dark ? Color(hex: 0x33333b) : Color(hex: 0xe8e8e8) }
-    var card: Color { dark ? Color(hex: 0x1c1c20) : Color(hex: 0xf6f4f4) }
+    var line: Color { dark ? Color(hex: 0x33333b) : Color(hex: 0xe2e0e0) }
+    var plate: Color { dark ? Color(hex: 0x1b1b1f) : .white }
+    var profileCard: Color { dark ? Color(hex: 0x2a2a30) : Color(hex: 0xdedede) }
+    var track: Color { dark ? Color(hex: 0x2d2d33) : Color(hex: 0xededed) }
     var blue: Color { Color(hex: 0x2f7fd0) }
     var teal: Color { Color(hex: 0x5f93a6) }
     var red: Color { Color(hex: 0xc43329) }
@@ -47,7 +49,6 @@ final class CookSession: ObservableObject {
     @Published var lowWater = false
     @Published var dark = false
 
-    // active cook
     @Published var remaining: Double = 0
     @Published var total: Double = 0
     @Published var paused = false
@@ -55,14 +56,9 @@ final class CookSession: ObservableObject {
     let durations: [String: Int] = ["Rafadan": 300, "Kayısı": 480, "Katı": 600]
     var theme: Theme { Theme(dark: dark) }
 
-    func donenessTotal() -> Int {
-        doneness == "Özel" ? customMin * 60 + customSec : (durations[doneness] ?? 300)
-    }
-    func startCook() {
-        total = Double(donenessTotal())
-        remaining = total
-        paused = false
-    }
+    func donenessTotal() -> Int { doneness == "Özel" ? customMin * 60 + customSec : (durations[doneness] ?? 300) }
+    func customLabel() -> String { String(format: "%02d:%02d", customMin, customSec) }
+    func startCook() { total = Double(donenessTotal()); remaining = total; paused = false }
     func cycleCount() { count = count >= 6 ? 1 : count + 1 }
 }
 
@@ -78,7 +74,6 @@ struct RootView: View {
     @StateObject private var s = CookSession()
     @State private var showSplash = true
     @State private var path: [Screen] = []
-
     var body: some View {
         ZStack {
             s.theme.screen.ignoresSafeArea()
@@ -109,30 +104,105 @@ struct RootView: View {
     }
 }
 
-// MARK: - Shared button
-struct PillButton: ButtonStyle {
-    var bg: Color
+// MARK: - Bordo button (rounded-rect, white text, shadow)
+struct Bordo: ButtonStyle {
+    var t: Theme
+    var radius: CGFloat = 22
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 15, weight: .light))
+            .font(.system(size: 16, weight: .light))
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 9)
-            .background(configuration.isPressed ? bg.opacity(0.85) : bg)
-            .clipShape(Capsule())
+            .padding(.vertical, 12)
+            .background(RoundedRectangle(cornerRadius: radius).fill(t.maroon))
+            .shadow(color: .black.opacity(0.18), radius: 5, y: 3)
+            .opacity(configuration.isPressed ? 0.85 : 1)
     }
 }
 
-// MARK: - 01 Splash
+// MARK: - Shapes / icons
+struct EggShape: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        let w = r.width, h = r.height, cx = r.midX
+        p.move(to: CGPoint(x: cx, y: r.minY))
+        p.addCurve(to: CGPoint(x: cx, y: r.maxY),
+                   control1: CGPoint(x: r.maxX + w * 0.04, y: r.minY + h * 0.26),
+                   control2: CGPoint(x: r.maxX, y: r.minY + h * 0.82))
+        p.addCurve(to: CGPoint(x: cx, y: r.minY),
+                   control1: CGPoint(x: r.minX, y: r.minY + h * 0.82),
+                   control2: CGPoint(x: r.minX - w * 0.04, y: r.minY + h * 0.26))
+        p.closeSubpath()
+        return p
+    }
+}
+
+// one egg on the dial: filled white (selected) or gray, with a soft drop shadow + smile
+struct DialEgg: View {
+    var selected: Bool
+    var t: Theme
+    var body: some View {
+        EggShape()
+            .fill(selected ? Color.white : t.egg)
+            .overlay(EggShape().stroke(Color.black.opacity(0.06), lineWidth: 1))
+            .overlay(
+                Path { p in
+                    p.move(to: CGPoint(x: 7, y: 24)); p.addQuadCurve(to: CGPoint(x: 14, y: 24), control: CGPoint(x: 10.5, y: 27))
+                }.stroke(Color.black.opacity(0.14), lineWidth: 1.2)
+            )
+            .frame(width: 21, height: 29)
+            .shadow(color: .black.opacity(0.18), radius: 3, y: 3)
+    }
+}
+
+struct RafadanIcon: View { // fried egg (white + yolk)
+    var c: Color
+    var body: some View {
+        ZStack {
+            Ellipse().stroke(c, lineWidth: 1.7).frame(width: 27, height: 21)
+            Circle().stroke(c, lineWidth: 1.7).frame(width: 9, height: 9).offset(x: -2.5, y: -1)
+        }.frame(width: 30, height: 30)
+    }
+}
+struct KayisiIcon: View { // sun / flower
+    var c: Color
+    var body: some View {
+        ZStack {
+            ForEach(0..<8, id: \.self) { i in
+                Capsule().fill(c).frame(width: 2, height: 5).offset(y: -12).rotationEffect(.degrees(Double(i) * 45))
+            }
+            Circle().stroke(c, lineWidth: 1.7).frame(width: 11, height: 11)
+        }.frame(width: 30, height: 30)
+    }
+}
+struct KatiIcon: View { // concentric rings
+    var c: Color
+    var body: some View {
+        ZStack {
+            Circle().stroke(c, lineWidth: 1.7).frame(width: 26, height: 26)
+            Circle().stroke(c, lineWidth: 1.7).frame(width: 9, height: 9)
+        }.frame(width: 30, height: 30)
+    }
+}
+
+// MARK: - 01 Splash (striped ghost wordmark + VESTEL)
 struct SplashView: View {
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: 0x6c1626), Color(hex: 0x9c2236), Color(hex: 0x591320)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
-                .ignoresSafeArea()
-            VStack(spacing: 8) {
-                Text("EggChef").font(.system(size: 30, weight: .light)).foregroundColor(.white)
-                Text("VESTEL").font(.system(size: 12, weight: .heavy)).tracking(3).foregroundColor(.white.opacity(0.85))
+            LinearGradient(colors: [Color(hex: 0x7a1c2e), Color(hex: 0x9c2236), Color(hex: 0x591320)],
+                           startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+            ZStack {
+                VStack(spacing: 3) {
+                    ForEach(0..<18, id: \.self) { _ in Rectangle().fill(Color.white.opacity(0.5)).frame(height: 1.5) }
+                }
+                .frame(width: 270, height: 92)
+                .mask(Text("EggChef").font(.system(size: 52, weight: .thin)))
+                .offset(y: -10)
+                Text("EggChef").font(.system(size: 40, weight: .thin)).foregroundColor(.white)
+            }
+            VStack {
+                Spacer()
+                Text("VESTEL").font(.system(size: 15, weight: .heavy)).tracking(4).foregroundColor(.white).padding(.bottom, 16)
             }
         }
     }
@@ -146,37 +216,44 @@ struct MainView: View {
         let t = s.theme
         ScrollView {
             VStack(spacing: 12) {
-                Text("EggChef")
-                    .font(.system(size: 18, weight: .regular))
-                    .foregroundColor(t.bordoMid)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                ZStack {
+                    Text("EggChef").font(.system(size: 17)).foregroundColor(t.gray)
+                    HStack { Spacer(); Image(systemName: "xmark").font(.system(size: 16, weight: .medium)).foregroundColor(t.gray) }
+                }
+                .padding(.horizontal, 4).padding(.top, 2)
+
                 Button { path.append(.count) } label: {
-                    Label("Yeni Pişirme", systemImage: "oval.portrait.fill")
-                }.buttonStyle(PillButton(bg: t.maroon))
+                    HStack(spacing: 8) {
+                        Text("Yeni Pişirme")
+                        EggShape().fill(Color.white).frame(width: 16, height: 21)
+                    }
+                }.buttonStyle(Bordo(t: t, radius: 22))
+
                 Button { path.append(.profile) } label: {
-                    Label("Profil ve Ayarlar", systemImage: "gearshape.fill")
-                }.buttonStyle(PillButton(bg: t.maroon))
+                    HStack(spacing: 8) {
+                        Text("Profil ve Ayarlar")
+                        Image(systemName: "gearshape.fill").font(.system(size: 16))
+                    }
+                }.buttonStyle(Bordo(t: t, radius: 22))
             }
             .padding(.horizontal, 6)
-            .padding(.top, 2)
         }
         .background(t.screen.ignoresSafeArea())
         .navigationTitle("")
     }
 }
 
-// MARK: - 03 Egg count (tap the dial to cycle 1→6→1; selected eggs fill bordo)
+// MARK: - 03 Egg count (tap dial to cycle 1→6; selected eggs fill WHITE per Figma)
 struct CountView: View {
     @ObservedObject var s: CookSession
     @Binding var path: [Screen]
     var body: some View {
         let t = s.theme
         ScrollView {
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 EggDial(s: s)
-                Button { path.append(.doneness) } label: { Text("Devam") }
-                    .buttonStyle(PillButton(bg: t.maroon))
-                    .padding(.horizontal, 6)
+                Button { path.append(.doneness) } label: { Text("Devam  ›") }
+                    .buttonStyle(Bordo(t: t, radius: 24)).padding(.horizontal, 8)
             }
             .padding(.top, 2)
         }
@@ -189,97 +266,102 @@ struct EggDial: View {
     @ObservedObject var s: CookSession
     var body: some View {
         let t = s.theme
-        let R: CGFloat = 52
+        let R: CGFloat = 50
         ZStack {
+            Circle().fill(t.plate).frame(width: 156, height: 156)
+                .shadow(color: .black.opacity(0.12), radius: 10, y: 5)
             ForEach(0..<6, id: \.self) { i in
                 let ang = (Double(i) * 60.0 - 60.0) * .pi / 180.0
-                Ellipse()
-                    .fill(i < s.count ? t.bordo : t.egg)
-                    .frame(width: 20, height: 28)
-                    .opacity(i < s.count ? 1 : 0.55)
+                DialEgg(selected: i < s.count, t: t)
                     .offset(x: R * CGFloat(cos(ang)), y: R * CGFloat(sin(ang)))
             }
             VStack(spacing: -2) {
-                Text("\(s.count)").font(.system(size: 38, weight: .light)).foregroundColor(t.bordo)
-                Text("adet").font(.system(size: 13, weight: .light)).foregroundColor(t.gray)
+                Text("\(s.count)").font(.system(size: 40, weight: .light)).foregroundColor(t.bordo)
+                Text("adet").font(.system(size: 14, weight: .light)).foregroundColor(t.gray)
             }
         }
-        .frame(width: 150, height: 150)
+        .frame(width: 170, height: 170)
         .contentShape(Rectangle())
         .onTapGesture { s.cycleCount() }
     }
 }
 
-// MARK: - 04 Doneness
+// MARK: - 04 Doneness (2×2 grid, divider cross, outline icons, Özel shows time)
 struct DonenessView: View {
     @ObservedObject var s: CookSession
     @Binding var path: [Screen]
-    private let names = ["Rafadan", "Kayısı", "Katı", "Özel"]
-    private func icon(_ n: String) -> String {
-        switch n {
-        case "Rafadan": return "drop.fill"
-        case "Kayısı": return "circle.lefthalf.filled"
-        case "Katı": return "circle.fill"
-        default: return "clock"
-        }
-    }
     var body: some View {
         let t = s.theme
         ScrollView {
-            VStack(spacing: 8) {
-                Text("Hızlı Pişirme").font(.system(size: 14, weight: .light)).foregroundColor(t.gray)
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
-                    ForEach(names, id: \.self) { n in
-                        Button { pick(n) } label: {
-                            VStack(spacing: 5) {
-                                Image(systemName: icon(n)).font(.system(size: 18)).foregroundColor(t.bordoMid)
-                                Text(n).font(.system(size: 12, weight: .light)).foregroundColor(t.ink)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(RoundedRectangle(cornerRadius: 12).fill(t.card))
-                        }.buttonStyle(.plain)
+            VStack(spacing: 10) {
+                Text("Hızlı Pişirme").font(.system(size: 17, weight: .light)).foregroundColor(t.gray)
+                ZStack {
+                    VStack(spacing: 0) {
+                        HStack(spacing: 0) {
+                            cell(label: "Rafadan") { AnyView(RafadanIcon(c: t.gray)) } tap: { s.doneness = "Rafadan"; path.append(.water) }
+                            cell(label: "Kayısı") { AnyView(KayisiIcon(c: t.gray)) } tap: { s.doneness = "Kayısı"; path.append(.water) }
+                        }
+                        HStack(spacing: 0) {
+                            cell(label: "Katı") { AnyView(KatiIcon(c: t.gray)) } tap: { s.doneness = "Katı"; path.append(.water) }
+                            cell(label: "Özel") { AnyView(Text(s.customLabel()).font(.system(size: 22, weight: .light)).foregroundColor(t.bordo)) } tap: { path.append(.custom) }
+                        }
                     }
+                    Rectangle().fill(t.line).frame(width: 1).padding(.vertical, 16)
+                    Rectangle().fill(t.line).frame(height: 1).padding(.horizontal, 14)
                 }
             }
-            .padding(.horizontal, 6)
+            .padding(.horizontal, 6).padding(.top, 2)
         }
         .background(t.screen.ignoresSafeArea())
         .navigationTitle("Kıvam")
     }
-    private func pick(_ d: String) {
-        if d == "Özel" { path.append(.custom) }
-        else { s.doneness = d; path.append(.water) }
+    private func cell(label: String, @ViewBuilder icon: () -> AnyView, tap: @escaping () -> Void) -> some View {
+        let t = s.theme
+        return Button(action: tap) {
+            VStack(spacing: 6) {
+                icon().frame(height: 30)
+                Text(label).font(.system(size: 13, weight: .light)).foregroundColor(t.ink)
+            }
+            .frame(maxWidth: .infinity).padding(.vertical, 12)
+        }.buttonStyle(.plain)
     }
 }
 
-// MARK: - 05 Custom time (native crown-driven wheels)
+// MARK: - 05 Custom time (white card + crown wheels + bordo Tamam bar)
 struct CustomView: View {
     @ObservedObject var s: CookSession
     @Binding var path: [Screen]
     var body: some View {
         let t = s.theme
-        VStack(spacing: 8) {
-            HStack(spacing: 4) {
+        VStack(spacing: 0) {
+            HStack(spacing: 2) {
                 Picker("", selection: $s.customMin) {
                     ForEach(0..<31, id: \.self) { Text(String(format: "%02d", $0)).tag($0) }
-                }.labelsHidden().frame(width: 56)
-                Text(":").font(.system(size: 24, weight: .light)).foregroundColor(t.bordo)
+                }.labelsHidden().frame(width: 58)
+                Text(":").font(.system(size: 26, weight: .light)).foregroundColor(popInk)
                 Picker("", selection: $s.customSec) {
                     ForEach(0..<60, id: \.self) { Text(String(format: "%02d", $0)).tag($0) }
-                }.labelsHidden().frame(width: 56)
+                }.labelsHidden().frame(width: 58)
             }
-            .frame(height: 92)
-            Button { s.doneness = "Özel"; path.append(.water) } label: { Text("Tamam") }
-                .buttonStyle(PillButton(bg: t.maroon))
-                .padding(.horizontal, 6)
+            .frame(height: 96).padding(.top, 6)
+            .background(Color.white)
+
+            Button { s.doneness = "Özel"; path.append(.water) } label: {
+                Text("Tamam").font(.system(size: 16, weight: .light)).foregroundColor(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 11).background(t.maroon)
+            }.buttonStyle(.plain)
         }
+        .environment(\.colorScheme, .light) // keep the white card's wheel text dark even in Dark Mode
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+        .padding(.horizontal, 14).padding(.vertical, 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(t.screen.ignoresSafeArea())
         .navigationTitle("Özel")
     }
 }
 
-// MARK: - 06 Water (tap the water row to toggle full/low — lets you demo the warning)
+// MARK: - 06 Water (outline icons, divider, tap the water row to toggle full/low)
 struct WaterView: View {
     @ObservedObject var s: CookSession
     @Binding var path: [Screen]
@@ -287,75 +369,72 @@ struct WaterView: View {
     var body: some View {
         let t = s.theme
         ScrollView {
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
                 Button { s.lowWater.toggle() } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "drop.fill").foregroundColor(s.lowWater ? t.red : t.blue)
+                    HStack(spacing: 12) {
+                        Image(systemName: "drop").font(.system(size: 26)).foregroundColor(t.blue)
                         VStack(alignment: .leading, spacing: 1) {
-                            Text("Haznedeki Su").font(.system(size: 12, weight: .light)).foregroundColor(t.gray)
-                            Text(s.lowWater ? "~5 ml" : "~65 ml").font(.system(size: 16)).foregroundColor(s.lowWater ? t.red : t.teal)
+                            Text("Haznedeki Su\nMiktarı").font(.system(size: 14, weight: .light)).foregroundColor(t.gray)
+                            HStack(spacing: 5) {
+                                Text(s.lowWater ? "~5 ml" : "~65 ml").font(.system(size: 17)).foregroundColor(s.lowWater ? t.red : t.teal)
+                                if s.lowWater { Image(systemName: "exclamationmark.circle").font(.system(size: 14)).foregroundColor(t.red) }
+                            }
                         }
                         Spacer()
                     }
-                    .padding(10)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(t.card))
                 }.buttonStyle(.plain)
 
-                HStack(spacing: 10) {
-                    Image(systemName: "clock").foregroundColor(t.gray)
+                Rectangle().fill(t.line).frame(height: 1)
+
+                HStack(spacing: 12) {
+                    Image(systemName: "clock").font(.system(size: 25)).foregroundColor(t.gray)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("Tahmini Süre").font(.system(size: 12, weight: .light)).foregroundColor(t.gray)
-                        Text("\(max(1, s.donenessTotal() / 60)) dakika").font(.system(size: 16)).foregroundColor(t.teal)
+                        Text("Tahmini Pişirme\nSüresi").font(.system(size: 14, weight: .light)).foregroundColor(t.gray)
+                        Text("\(max(1, s.donenessTotal() / 60)) dakika").font(.system(size: 17)).foregroundColor(t.teal)
                     }
                     Spacer()
                 }
-                .padding(10)
-                .background(RoundedRectangle(cornerRadius: 12).fill(t.card))
 
-                Button { start() } label: { Text("Başlat") }
-                    .buttonStyle(PillButton(bg: t.maroon))
+                Button { start() } label: { Text("Başlat") }.buttonStyle(Bordo(t: t, radius: 26)).padding(.top, 2)
             }
-            .padding(.horizontal, 6)
+            .padding(.horizontal, 10).padding(.top, 2)
         }
         .background(t.screen.ignoresSafeArea())
         .navigationTitle("Su")
         .overlay { if showWarn { WaterWarnOverlay(s: s, show: $showWarn) } }
     }
     private func start() {
-        if s.lowWater { showWarn = true }
-        else { s.startCook(); path.append(.countdown) }
+        if s.lowWater { showWarn = true } else { s.startCook(); path.append(.countdown) }
     }
 }
 
-// MARK: - 07 Countdown
+// MARK: - 07 Countdown (light ring, bordo time, pause)
 struct CountdownView: View {
     @ObservedObject var s: CookSession
     @Binding var path: [Screen]
     @State private var showDone = false
     private let demoSeconds = 20.0
     private let tick = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
-
     var body: some View {
         let t = s.theme
         let progress = s.total > 0 ? min(1.0, max(0.0, 1 - s.remaining / s.total)) : 0
         ZStack {
-            Circle().stroke(t.egg.opacity(0.5), lineWidth: 9)
-            Circle()
-                .trim(from: 0, to: CGFloat(progress))
+            Circle().stroke(t.track, lineWidth: 9)
+            Circle().trim(from: 0, to: CGFloat(progress))
                 .stroke(t.bordo, style: StrokeStyle(lineWidth: 9, lineCap: .round))
-                .rotationEffect(.degrees(-90))
+                .rotationEffect(.degrees(90))
             VStack(spacing: 0) {
-                Text(fmt(s.remaining)).font(.system(size: 34, weight: .thin)).foregroundColor(t.bordo).monospacedDigit()
-                Text("kaldı").font(.system(size: 12, weight: .light)).foregroundColor(t.gray)
+                Text(fmt(s.remaining)).font(.system(size: 44, weight: .thin)).foregroundColor(t.bordo).monospacedDigit()
+                Text("kaldı").font(.system(size: 15, weight: .light)).foregroundColor(t.bordo)
             }
             VStack {
                 Spacer()
                 Button { s.paused.toggle() } label: {
-                    Image(systemName: s.paused ? "play.fill" : "pause.fill").font(.system(size: 12)).foregroundColor(t.gray)
-                }.buttonStyle(.plain).padding(.bottom, 4)
+                    Image(systemName: s.paused ? "play.fill" : "pause.fill").font(.system(size: 13)).foregroundColor(t.gray)
+                }.buttonStyle(.plain).padding(.bottom, 8)
             }
         }
-        .frame(width: 150, height: 150)
+        .frame(width: 168, height: 168)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(t.screen.ignoresSafeArea())
         .navigationTitle("")
@@ -368,47 +447,55 @@ struct CountdownView: View {
         s.remaining -= s.total / demoSeconds * 0.1
         if s.remaining <= 0 { s.remaining = 0; showDone = true }
     }
-    private func fmt(_ x: Double) -> String {
-        let r = Int(ceil(x)); return String(format: "%02d:%02d", r / 60, r % 60)
-    }
+    private func fmt(_ x: Double) -> String { let r = Int(ceil(x)); return String(format: "%02d:%02d", r / 60, r % 60) }
 }
 
 // MARK: - 08 Profile
 struct ProfileView: View {
     @ObservedObject var s: CookSession
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         let t = s.theme
         ScrollView {
-            VStack(spacing: 10) {
-                Circle().fill(t.egg).frame(width: 50, height: 50)
-                    .overlay(Text("Foto").font(.system(size: 11, weight: .light)).foregroundColor(t.gray))
-                Text("Ahmet").font(.system(size: 17)).foregroundColor(t.ink)
+            VStack(spacing: 12) {
+                HStack { Spacer(); Button { dismiss() } label: { Image(systemName: "xmark").font(.system(size: 18, weight: .medium)).foregroundColor(t.gray) }.buttonStyle(.plain) }
 
-                HStack {
-                    Text("Dil").font(.system(size: 13, weight: .light)).foregroundColor(t.gray)
+                HStack(spacing: 12) {
+                    Circle().fill(t.profileCard).frame(width: 56, height: 56)
+                        .overlay(Text("Foto").font(.system(size: 12, weight: .light)).foregroundColor(t.gray))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Ahmet").font(.system(size: 20)).foregroundColor(t.ink)
+                        Text("ahm******@gmail.com").font(.system(size: 11, weight: .light)).foregroundColor(t.gray)
+                    }
                     Spacer()
-                    Text("🇹🇷 Türkçe").font(.system(size: 13)).foregroundColor(t.ink)
                 }
-                .padding(10)
-                .background(RoundedRectangle(cornerRadius: 12).fill(t.card))
 
-                Toggle(isOn: $s.dark) {
-                    Text("Dark Mode").font(.system(size: 13)).foregroundColor(t.ink)
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Dil Seçimi").font(.system(size: 12, weight: .light)).foregroundColor(t.gray)
+                        Text("🇹🇷 Türkçe (TR)").font(.system(size: 13)).foregroundColor(t.ink)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(10)
+                    .background(RoundedRectangle(cornerRadius: 14).fill(t.profileCard))
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Dark Mode").font(.system(size: 12, weight: .light)).foregroundColor(t.gray)
+                        Toggle("", isOn: $s.dark).labelsHidden().tint(t.bordo).scaleEffect(0.8).frame(height: 18)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(10)
+                    .background(RoundedRectangle(cornerRadius: 14).fill(t.profileCard))
                 }
-                .tint(t.bordo)
-                .padding(.horizontal, 10).padding(.vertical, 6)
-                .background(RoundedRectangle(cornerRadius: 12).fill(t.card))
 
-                Text("EggChef/A98S77AFG").font(.system(size: 11, weight: .light)).foregroundColor(t.gray)
+                Text("EggChef/A98S77AFG").font(.system(size: 12, weight: .light)).foregroundColor(t.gray).padding(.top, 2)
             }
-            .padding(.horizontal, 6)
+            .padding(.horizontal, 8).padding(.top, 2)
         }
         .background(t.screen.ignoresSafeArea())
-        .navigationTitle("Profil")
+        .navigationTitle("Profil").navigationBarBackButtonHidden(true)
     }
 }
 
-// MARK: - Overlays
+// MARK: - Popups (white card + floating badge + bordo Tamam bar)
 struct WaterWarnOverlay: View {
     @ObservedObject var s: CookSession
     @Binding var show: Bool
@@ -416,15 +503,25 @@ struct WaterWarnOverlay: View {
         let t = s.theme
         ZStack {
             Color.black.opacity(0.5).ignoresSafeArea()
-            VStack(spacing: 8) {
-                Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 26)).foregroundColor(t.red)
-                Text("Su seviyesi yetersiz!").font(.system(size: 14)).foregroundColor(t.ink).multilineTextAlignment(.center)
-                Text("Lütfen su haznesine su ekleyin.").font(.system(size: 12, weight: .light)).foregroundColor(t.gray).multilineTextAlignment(.center)
-                Button { s.lowWater = false; show = false } label: { Text("Tamam") }.buttonStyle(PillButton(bg: t.maroon))
+            ZStack(alignment: .top) {
+                VStack(spacing: 0) {
+                    Text("Su seviyesi yetersiz!\nLütfen su haznesine\nsu ekleyiniz.")
+                        .font(.system(size: 14, weight: .light)).foregroundColor(popInk)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 30).padding(.bottom, 14).padding(.horizontal, 12)
+                        .frame(maxWidth: .infinity).background(Color.white)
+                    Button { s.lowWater = false; show = false } label: {
+                        Text("Tamam").font(.system(size: 16, weight: .light)).foregroundColor(.white)
+                            .frame(maxWidth: .infinity).padding(.vertical, 11).background(t.maroon)
+                    }.buttonStyle(.plain)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 18))
+                Circle().fill(Color.white).frame(width: 46, height: 46)
+                    .overlay(Circle().stroke(t.bordo.opacity(0.3), lineWidth: 2))
+                    .overlay(Text("!").font(.system(size: 24, weight: .bold)).foregroundColor(t.bordo))
+                    .offset(y: -23)
             }
-            .padding(14)
-            .background(RoundedRectangle(cornerRadius: 18).fill(t.card))
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 16)
         }
     }
 }
@@ -436,17 +533,24 @@ struct DoneOverlay: View {
         let t = s.theme
         ZStack {
             Color.black.opacity(0.5).ignoresSafeArea()
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle().fill(t.bordo).frame(width: 50, height: 50)
-                    Image(systemName: "checkmark").font(.system(size: 24, weight: .bold)).foregroundColor(.white)
+            ZStack(alignment: .top) {
+                VStack(spacing: 0) {
+                    Text("Pişirme bitti!")
+                        .font(.system(size: 17, weight: .regular)).foregroundColor(popInk)
+                        .padding(.top, 34).padding(.bottom, 22).padding(.horizontal, 12)
+                        .frame(maxWidth: .infinity).background(Color.white)
+                    Button { onDismiss() } label: {
+                        Text("Tamam").font(.system(size: 16, weight: .light)).foregroundColor(.white)
+                            .frame(maxWidth: .infinity).padding(.vertical, 11).background(t.maroon)
+                    }.buttonStyle(.plain)
                 }
-                Text("Pişirme bitti!").font(.system(size: 15)).foregroundColor(t.ink)
-                Button { onDismiss() } label: { Text("Tamam") }.buttonStyle(PillButton(bg: t.maroon))
+                .clipShape(RoundedRectangle(cornerRadius: 18))
+                Circle().fill(Color.white).frame(width: 46, height: 46)
+                    .overlay(Image(systemName: "checkmark").font(.system(size: 22, weight: .bold)).foregroundColor(t.bordo))
+                    .shadow(color: .black.opacity(0.12), radius: 3, y: 2)
+                    .offset(y: -23)
             }
-            .padding(14)
-            .background(RoundedRectangle(cornerRadius: 18).fill(t.card))
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 16)
         }
     }
 }
