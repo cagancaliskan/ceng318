@@ -10,17 +10,17 @@ import { useUI } from '../theme/ui';
 import { Txt } from '../components/Txt';
 import { Field } from '../components/Field';
 import { LinearGrad } from '../components/Gradient';
-import { Mail, Lock, ArrowRight, Egg } from '../icons';
+import { Mail, Lock, ArrowRight } from '../icons';
 import { useAuth, authErr } from '../state/auth';
 import type { RootStackParamList } from '../navigation/types';
 
-const ERR = '#e0556a';
+const ERR = '#ffb3bf';
 
-// 02 · Login (kullanıcı girişi)
+// 02 · Login — bordo gradient with VESTEL + EggChef wordmarks (Figma).
 export function LoginScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
-  const { C, L, theme } = useUI();
+  const { C, L } = useUI();
   const { logIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,35 +37,42 @@ export function LoginScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.bg, paddingTop: insets.top, paddingHorizontal: ds(37) }}>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+    <LinearGrad
+      deg={180}
+      colors={['#581321', '#8e2238', '#c0485f']}
+      locations={[0, 0.55, 1]}
+      style={{ flex: 1, paddingTop: insets.top, paddingHorizontal: ds(37) }}
+    >
+      <StatusBar style="light" />
 
-      {/* logo + wordmark */}
-      <View style={{ alignItems: 'center', marginTop: ds(96) }}>
-        <Egg size={30} fill="none" stroke={C.bordoMid} sw={2} />
-        <Txt size={42} weight={300} color={C.bordoMid} style={{ marginTop: ds(10) }}>
+      {/* VESTEL + EggChef wordmarks */}
+      <View style={{ alignItems: 'center', marginTop: ds(76) }}>
+        <Txt size={24} weight={700} color="#ffffff" ls={2}>
+          VESTEL
+        </Txt>
+        <Txt size={42} weight={300} color="#ffffff" style={{ marginTop: ds(14) }}>
           EggChef
         </Txt>
       </View>
 
       {/* fields */}
-      <View style={{ marginTop: ds(58), gap: ds(32) }}>
+      <View style={{ marginTop: ds(56), gap: ds(28) }}>
         <Field icon={<Mail size={24} color={C.bordo} />} placeholder={L('E-posta', 'Email')} value={email} onChangeText={setEmail} keyboardType="email-address" />
         <Field icon={<Lock size={24} color={C.bordo} />} placeholder={L('Şifre', 'Password')} value={password} onChangeText={setPassword} secure />
       </View>
 
       {/* forgot / register */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: ds(26), paddingHorizontal: ds(2) }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: ds(24), paddingHorizontal: ds(2) }}>
         <Pressable onPress={() => nav.navigate('ForgotPassword')}>
-          <Txt size={14} weight={300} color={C.black}>
+          <Txt size={14} weight={300} color="rgba(255,255,255,0.9)">
             {L('Şifremi Unuttum', 'Forgot Password')}
           </Txt>
         </Pressable>
         <Pressable onPress={() => nav.navigate('Register')} style={{ flexDirection: 'row', alignItems: 'center', gap: ds(4) }}>
-          <Txt size={13} weight={400} color={C.bordoMid}>
+          <Txt size={13} weight={400} color="#ffffff">
             {L('Kayıt Ol', 'Sign Up')}
           </Txt>
-          <ArrowRight size={18} color={C.bordoMid} sw={2} />
+          <ArrowRight size={18} color="#ffffff" sw={2} />
         </Pressable>
       </View>
 
@@ -76,14 +83,23 @@ export function LoginScreen() {
         </Txt>
       )}
 
-      {/* submit */}
-      <Pressable onPress={submit} style={{ marginTop: error ? ds(14) : ds(46) }}>
-        <LinearGrad deg={90} colors={['#ad283e', '#8a2032']} style={{ height: ds(60), borderRadius: ds(16), alignItems: 'center', justifyContent: 'center', boxShadow: bs('0 6px 14px -4px rgba(138,32,50,0.5)') }}>
-          <Txt size={20} weight={300} color="#ffffff">
-            {L('Giriş Yap', 'Log In')}
-          </Txt>
-        </LinearGrad>
+      {/* submit — translucent button over the gradient */}
+      <Pressable
+        onPress={submit}
+        style={{
+          marginTop: error ? ds(16) : ds(40),
+          height: ds(60),
+          borderRadius: ds(16),
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(74,15,24,0.45)',
+          boxShadow: bs('inset 0 1px 0 0 rgba(255,255,255,0.18), 0 8px 18px -6px rgba(0,0,0,0.35)'),
+        }}
+      >
+        <Txt size={20} weight={300} color="#ffffff">
+          {L('Giriş Yap', 'Log In')}
+        </Txt>
       </Pressable>
-    </View>
+    </LinearGrad>
   );
 }
