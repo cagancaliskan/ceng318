@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Pressable, Animated, Easing } from 'react-native';
+import { View, Pressable, Animated, Easing, Platform } from 'react-native';
 import Svg, { Defs, LinearGradient as SvgLinear, Stop, Circle, Path } from 'react-native-svg';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { C } from '../theme/colors';
 import { ds } from '../theme/scale';
@@ -49,7 +49,7 @@ function StageIcon({ id, color, size = 26 }: { id: number; color: string; size?:
 function Pulse({ color }: { color: string }) {
   const p = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    const loop = Animated.loop(Animated.timing(p, { toValue: 1, duration: 1300, easing: Easing.out(Easing.ease), useNativeDriver: true }));
+    const loop = Animated.loop(Animated.timing(p, { toValue: 1, duration: 1300, easing: Easing.out(Easing.ease), useNativeDriver: Platform.OS !== 'web' }));
     loop.start();
     return () => loop.stop();
   }, [p]);
@@ -69,14 +69,17 @@ export function CookingScreen() {
   const nav = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const s = useSession();
   const { C, L } = useUI();
-  const focused = useIsFocused();
   const [, force] = useState(0);
 
+  // Tick once a second WHILE a cook is active. Driven off cook state only (not
+  // useIsFocused, which is unreliable on web and froze the counter there). The
+  // remaining time is derived from cookStartedAt, so it stays correct across
+  // unmount/remount when switching tabs.
   useEffect(() => {
-    if (!focused || !s.cookActive) return;
+    if (!s.cookActive) return;
     const iv = setInterval(() => force((x) => (x + 1) % 1000000), 1000);
     return () => clearInterval(iv);
-  }, [focused, s.cookActive]);
+  }, [s.cookActive]);
 
   const elapsed = s.cookActive ? Math.floor((Date.now() - s.cookStartedAt) / 1000) : 0;
   const total = s.cookActive ? s.cookTotal : s.durationSec;
@@ -101,11 +104,11 @@ export function CookingScreen() {
   }
 
   useEffect(() => {
-    if (focused && s.cookActive && remaining === 0) {
+    if (s.cookActive && remaining === 0) {
       const t = setTimeout(() => nav.navigate('CookingComplete'), 300);
       return () => clearTimeout(t);
     }
-  }, [focused, s.cookActive, remaining, nav]);
+  }, [s.cookActive, remaining, nav]);
 
   // ring geometry. Progress sweeps CLOCKWISE from the top; the stage bubbles sit on
   // the RIGHT arc (same direction) so the sweep passes them in order: water → heat → boil.

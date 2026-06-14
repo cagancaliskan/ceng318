@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextProps } from 'react-native';
-import { hn } from '../theme/fonts';
+import { hn, hnWeight } from '../theme/fonts';
 import { ds } from '../theme/scale';
 import { C } from '../theme/colors';
 
@@ -23,7 +23,7 @@ export function Txt({ size = 14, weight = 400, color = C.black, ls, lh, center, 
     <Text
       {...rest}
       style={[
-        { fontFamily: hn(weight), fontSize: ds(size), color },
+        { fontFamily: hn(weight), fontWeight: hnWeight(weight), fontSize: ds(size), color },
         ls != null && { letterSpacing: ds(ls) },
         lh != null && { lineHeight: ds(lh) },
         center && { textAlign: 'center' },

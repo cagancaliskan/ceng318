@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Pressable, Animated, Easing } from 'react-native';
+import { View, Pressable, Animated, Easing, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,7 +17,7 @@ function Ring({ size, delay }: { size: number; delay: number }) {
   const p = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const loop = Animated.loop(
-      Animated.timing(p, { toValue: 1, duration: 2600, delay: delay * 1000, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+      Animated.timing(p, { toValue: 1, duration: 2600, delay: delay * 1000, easing: Easing.out(Easing.ease), useNativeDriver: Platform.OS !== 'web' }),
     );
     loop.start();
     return () => loop.stop();
